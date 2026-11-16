@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Puente de Idiomas</title>
+<meta name="description" content="Traduce y aprende frases sencillas desde el español: inglés, ruso, alemán, francés, italiano y ucraniano, con su pronunciación.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232443c9'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='30' font-weight='700' text-anchor='middle' fill='white'%3E%C3%B1%D1%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: una columna, como un cuaderno de frases. Cada frase es una entrada de
+   diccionario (palabra, [pronunciación]); solo los dos paneles del traductor y la
+   tarjeta de práctica llevan caja. */
+:root {
+  --bg: #f2f4f9;
+  --surface: #ffffff;
+  --ink: #161b2e;
+  --muted: #5a6381;
+  --line: #dde2ee;
+  --accent: #2443c9;
+  --on-accent: #ffffff;
+  --accent-soft: #e7ebff;
+  --mark: #ffe066;
+  --on-mark: #2b2300;
+  --ok: #17734d;
+  --danger: #b3261e;
+  --font-ui: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-word: "Literata", Georgia, "Times New Roman", serif;
+  --font-pron: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f121b; --surface: #181c2a; --ink: #e9ebf5; --muted: #9ba3bf; --line: #2b3147;
+    --accent: #93a5ff; --on-accent: #0c1130; --accent-soft: #232b52;
+    --mark: #574a0c; --on-mark: #ffe58a; --ok: #6ed2a1; --danger: #ff8f85;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f121b; --surface: #181c2a; --ink: #e9ebf5; --muted: #9ba3bf; --line: #2b3147;
+  --accent: #93a5ff; --on-accent: #0c1130; --accent-soft: #232b52;
+  --mark: #574a0c; --on-mark: #ffe58a; --ok: #6ed2a1; --danger: #ff8f85;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+button, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-block: 20px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cabecera */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark {
+  flex: none;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--accent); color: var(--on-accent);
+  font: 600 1.25rem/1 var(--font-word);
+  letter-spacing: 0.02em;
+}
+.brand-text { min-width: 0; }
+.brand h1 { font-size: 1.2rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.brand p { color: var(--muted); font-size: 0.875rem; line-height: 1.35; }
+
+.theme-btn {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.875rem; font-weight: 500;
+}
+.theme-btn svg { width: 18px; height: 18px; }
+@media (max-width: 480px) {
+  .theme-btn { width: 40px; padding: 0; justify-content: center; }
+  .theme-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+
+/* Pestañas */
+.tabs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface);
+}
+.tabs button {
+  height: 40px;
+  border: 0; border-radius: 999px;
+  background: transparent; color: var(--muted);
+  font-weight: 600;
+}
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+@media (min-width: 640px) { .tabs { align-self: flex-start; min-width: 320px; } }
+
+.view { display: flex; flex-direction: column; gap: 16px; }
+
+/* Traductor */
+.langbar { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; align-items: end; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field span { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.field select {
+  width: 100%; height: 44px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface);
+  font-weight: 600;
+}
+.icon-btn {
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--ink);
+}
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn.small { width: 36px; height: 36px; border-radius: 8px; }
+.icon-btn.small svg { width: 18px; height: 18px; }
+.icon-btn.is-speaking { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.speak { display: none; }
+body.can-speak .speak { display: inline-flex; }
+
+.panes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .panes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.pane {
+  display: flex; flex-direction: column; gap: 12px;
+  min-height: 200px; min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
+}
+.pane textarea {
+  flex: 1; width: 100%; min-height: 96px;
+  padding: 0; border: 0; resize: none;
+  background: transparent;
+  font-size: 1.2rem; line-height: 1.4;
+}
+.pane textarea:focus { outline: none; }
+.pane:focus-within { border-color: var(--accent); }
+.pane-body { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pane-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; }
+.pane-foot .actions { display: flex; gap: 8px; margin-left: auto; }
+.count { color: var(--muted); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
+
+.headword {
+  font: 600 1.6rem/1.25 var(--font-word);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.headword.placeholder { color: var(--muted); font: 400 1rem/1.5 var(--font-ui); }
+.pron {
+  color: var(--muted);
+  font: 400 0.95rem/1.6 var(--font-pron);
+  overflow-wrap: anywhere;
+}
+.pron::before { content: "["; }
+.pron::after { content: "]"; }
+.pron .stress {
+  padding: 0 3px; border-radius: 4px;
+  background: var(--mark); color: var(--on-mark);
+  font-weight: 600;
+}
+.pron .dot { opacity: 0.55; }
+.note { color: var(--muted); font-size: 0.9rem; }
+.note.error { color: var(--danger); }
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent);
+  font-size: 0.75rem; font-weight: 600;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 20px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface);
+  font-weight: 600;
+}
+.btn.primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.btn.good { border-color: var(--ok); color: var(--ok); }
+
+.tries { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tries > span { color: var(--muted); font-size: 0.875rem; }
+.fineprint { color: var(--muted); font-size: 0.8125rem; max-width: 65ch; }
+
+/* Chips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  min-height: 40px; padding: 7px 14px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface);
+  font-weight: 600;
+}
+.chip small { color: var(--muted); font-size: 0.75rem; font-weight: 500; }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.chip[aria-pressed="true"] small { color: inherit; }
+.chips.small .chip { min-height: 34px; padding: 4px 12px; font-size: 0.875rem; font-weight: 500; }
+
+/* Aprender */
+.learn-head { display: flex; flex-direction: column; gap: 8px; }
+.learn-head h2 { font: 600 1.5rem/1.2 var(--font-word); }
+.progress-row { display: flex; align-items: center; gap: 12px; }
+.progress-row p { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; flex: none; }
+.bar { flex: 1; max-width: 240px; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--ok); transition: width 0.25s ease; }
+
+.modes { display: inline-flex; align-self: flex-start; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.modes button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-weight: 600; font-size: 0.9rem; }
+.modes button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+
+.legend { color: var(--muted); font-size: 0.875rem; max-width: 65ch; }
+.legend b { padding: 0 3px; border-radius: 4px; background: var(--mark); color: var(--on-mark); font: 600 0.85em var(--font-pron); }
+
+.entries { border-top: 1px solid var(--line); }
+.entry {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.entry .es { color: var(--muted); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.entry .known { color: var(--ok); font-size: 0.75rem; font-weight: 600; }
+.entry .headword { font-size: 1.35rem; }
+.entry .text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.card {
+  display: flex; flex-direction: column; gap: 16px;
+  min-height: 280px; padding: 20px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
+}
+.card .step { color: var(--muted); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
+.card .prompt { font-size: 1.5rem; font-weight: 600; line-height: 1.25; text-wrap: balance; }
+.card .answer { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card .answer .headword { font-size: 2rem; }
+.card .answer .row { display: flex; align-items: center; gap: 12px; }
+.card .buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.card .buttons .btn { flex: 1 1 140px; }
+
+.alphabet { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.letter {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface);
+}
+.letter b { font: 600 1.5rem/1.2 var(--font-word); }
+.letter span { color: var(--muted); font: 400 0.8125rem/1.35 var(--font-pron); }
+.sounds { border-top: 1px solid var(--line); }
+.sounds li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.sounds b { font: 600 1rem/1.5 var(--font-pron); color: var(--accent); }
+.subhead { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  width: max-content; max-width: min(92vw, 420px);
+  padding: 10px 16px; border-radius: 10px;
+  background: var(--ink); color: var(--bg);
+  font-size: 0.9rem; z-index: 20;
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">ñя</div>
+      <div class="brand-text">
+        <h1>Puente de Idiomas</h1>
+        <p>Traduce y aprende frases sencillas desde el español</p>
+      </div>
+    </div>
+    <button type="button" id="theme-toggle" class="theme-btn">
+      <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg>
+      <span id="theme-label">Oscuro</span>
+    </button>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Secciones">
+    <button type="button" role="tab" id="tab-traducir" aria-controls="view-traducir" aria-selected="true">Traducir</button>
+    <button type="button" role="tab" id="tab-aprender" aria-controls="view-aprender" aria-selected="false" tabindex="-1">Aprender</button>
+  </div>
+
+  <main>
+    <section id="view-traducir" class="view" role="tabpanel" aria-labelledby="tab-traducir">
+      <div class="langbar">
+        <label class="field"><span>De</span><select id="src-lang"></select></label>
+        <button type="button" id="swap-langs" class="icon-btn" aria-label="Intercambiar idiomas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg>
+        </button>
+        <label class="field"><span>A</span><select id="dst-lang"></select></label>
+      </div>
+
+      <div class="panes">
+        <div class="pane">
+          <textarea id="source-text" maxlength="300" rows="3" aria-label="Texto para traducir" placeholder="Escribe una palabra o una frase corta">Buenos días</textarea>
+          <div class="pane-foot">
+            <span id="char-count" class="count">11 / 300</span>
+            <button type="button" id="translate-btn" class="btn primary">Traducir</button>
+          </div>
+        </div>
+        <div class="pane" aria-live="polite">
+          <div class="pane-body">
+            <p id="result-text" class="headword placeholder">La traducción aparecerá aquí.</p>
+            <p id="result-pron" class="pron" hidden></p>
+            <p id="result-note" class="note" hidden></p>
+          </div>
+          <div class="pane-foot">
+            <span id="result-origin" class="tag" hidden></span>
+            <div class="actions" id="result-actions" hidden>
+              <button type="button" id="result-speak" class="icon-btn small speak" aria-label="Escuchar la traducción">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+              </button>
+              <button type="button" id="result-copy" class="icon-btn small" aria-label="Copiar la traducción">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tries">
+        <span>Prueba con</span>
+        <div id="try-chips" class="chips small"></div>
+      </div>
+      <p class="fineprint">Las 40 frases del cuaderno se traducen al instante y sin conexión. Cualquier otro texto se envía al servicio gratuito MyMemory para traducirlo, así que no escribas datos personales.</p>
+    </section>
+
+    <section id="view-aprender" class="view" role="tabpanel" aria-labelledby="tab-aprender" hidden>
+      <div class="learn-head">
+        <h2>Español → <span id="learn-lang-name">ruso</span></h2>
+        <div class="progress-row">
+          <p id="progress-text">0 de 40 frases aprendidas</p>
+          <div class="bar" aria-hidden="true"><i id="progress-bar"></i></div>
+        </div>
+      </div>
+      <div id="lang-chips" class="chips" role="group" aria-label="Idioma que quieres aprender"></div>
+      <div id="mode-buttons" class="modes" role="group" aria-label="Modo de estudio"></div>
+      <div id="cat-chips" class="chips small" role="group" aria-label="Tema"></div>
+      <div id="learn-body" class="stack"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Datos ----------
+  const LANGS = {
+    es: { name: "Español", lower: "español", native: "Español" },
+    en: { name: "Inglés", lower: "inglés", native: "English" },
+    ru: { name: "Ruso", lower: "ruso", native: "Русский" },
+    de: { name: "Alemán", lower: "alemán", native: "Deutsch" },
+    fr: { name: "Francés", lower: "francés", native: "Français" },
+    it: { name: "Italiano", lower: "italiano", native: "Italiano" },
+    uk: { name: "Ucraniano", lower: "ucraniano", native: "Українська" },
+  };
+  const ORDER = ["es", "en", "ru", "de", "fr", "it", "uk"];
+  const LEARN = ["en", "ru", "de", "fr", "it", "uk"];
+
+  const ES = [
+    "Hola", "Buenos días", "Buenas tardes", "Buenas noches", "Adiós", "Hasta luego", "¿Cómo estás?", "Bien, gracias",
+    "Por favor", "Gracias", "De nada", "Disculpe", "Lo siento", "Sí", "No",
+    "Me llamo…", "¿Cómo te llamas?", "Mucho gusto", "¿Habla español?", "No entiendo",
+    "¿Dónde está el baño?", "¿Cuánto cuesta?", "¿Puede ayudarme?", "¿Qué hora es?",
+    "Agua", "Comida", "Amigo", "Casa", "Hoy", "Mañana",
+    "Uno", "Dos", "Tres", "Cuatro", "Cinco", "Seis", "Siete", "Ocho", "Nueve", "Diez",
+  ];
+  const CATS = [
+    { id: "todas", name: "Todas", from: 0, to: 40 },
+    { id: "saludos", name: "Saludos", from: 0, to: 8 },
+    { id: "cortesia", name: "Cortesía", from: 8, to: 15 },
+    { id: "conversar", name: "Conversar", from: 15, to: 20 },
+    { id: "preguntas", name: "Preguntas", from: 20, to: 24 },
+    { id: "palabras", name: "Palabras", from: 24, to: 30 },
+    { id: "numeros", name: "Números", from: 30, to: 40 },
+  ];
+
+  // [texto en el idioma, pronunciación escrita para hispanohablantes; MAYÚSCULAS = sílaba fuerte]
+  const BOOK = {
+    en: [
+      ["Hello", "je-LOU"], ["Good morning", "gud MOR-nin"], ["Good afternoon", "gud af-ter-NUN"], ["Good evening", "gud IV-nin"], ["Goodbye", "gud-BAI"], ["See you later", "si iu LEI-ter"], ["How are you?", "jau ar IU"], ["Fine, thank you", "fain, ZENK iu"],
+      ["Please", "plis"], ["Thank you", "ZENK iu"], ["You're welcome", "iur UEL-com"], ["Excuse me", "eks-KIUS mi"], ["I'm sorry", "aim SO-ri"], ["Yes", "ies"], ["No", "nou"],
+      ["My name is…", "mai NEIM is…"], ["What's your name?", "uats ior NEIM"], ["Nice to meet you", "nais tu MIT iu"], ["Do you speak Spanish?", "du iu spik SPA-nish"], ["I don't understand", "ai dount an-der-STAND"],
+      ["Where is the bathroom?", "uer is de BAZ-rum"], ["How much is it?", "jau MACH is it"], ["Can you help me?", "kan iu JELP mi"], ["What time is it?", "uat TAIM is it"],
+      ["Water", "UO-ter"], ["Food", "fud"], ["Friend", "frend"], ["House", "jaus"], ["Today", "tu-DEI"], ["Tomorrow", "tu-MO-rou"],
+      ["One", "uan"], ["Two", "tu"], ["Three", "zri"], ["Four", "for"], ["Five", "faiv"], ["Six", "siks"], ["Seven", "SE-ven"], ["Eight", "eit"], ["Nine", "nain"], ["Ten", "ten"],
+    ],
+    ru: [
+      ["Привет", "pri-VIET"], ["Доброе утро", "DO-bra-ie U-tra"], ["Добрый день", "DO-bri dien"], ["Добрый вечер", "DO-bri VIE-chir"], ["До свидания", "da svi-DA-ni-ia"], ["Пока", "pa-KA"], ["Как дела?", "kak di-LA"], ["Хорошо, спасибо", "ja-ra-SHO, spa-SI-ba"],
+      ["Пожалуйста", "pa-ZHA-lus-ta"], ["Спасибо", "spa-SI-ba"], ["Не за что", "NIE za shta"], ["Извините", "iz-vi-NI-tie"], ["Простите", "pras-TI-tie"], ["Да", "da"], ["Нет", "niet"],
+      ["Меня зовут…", "mi-NIA za-VUT…"], ["Как тебя зовут?", "kak ti-BIA za-VUT"], ["Очень приятно", "O-chin pri-IAT-na"], ["Вы говорите по-испански?", "vi ga-va-RI-tie pa is-PAN-ski"], ["Я не понимаю", "ia ni pa-ni-MA-iu"],
+      ["Где туалет?", "gdie tua-LIET"], ["Сколько стоит?", "SKOL-ka STO-it"], ["Вы можете мне помочь?", "vi MO-zhi-tie mnie pa-MOCH"], ["Который час?", "ka-TO-ri chas"],
+      ["Вода", "va-DA"], ["Еда", "ie-DA"], ["Друг", "druk"], ["Дом", "dom"], ["Сегодня", "si-VOD-nia"], ["Завтра", "ZAF-tra"],
+      ["Один", "a-DIN"], ["Два", "dva"], ["Три", "tri"], ["Четыре", "chi-TI-rie"], ["Пять", "piat"], ["Шесть", "shest"], ["Семь", "siem"], ["Восемь", "VO-sim"], ["Девять", "DIE-vit"], ["Десять", "DIE-sit"],
+    ],
+    de: [
+      ["Hallo", "JA-lo"], ["Guten Morgen", "GU-ten MOR-guen"], ["Guten Tag", "GU-ten tak"], ["Guten Abend", "GU-ten A-bent"], ["Auf Wiedersehen", "auf VI-der-se-en"], ["Bis später", "bis SHPE-ter"], ["Wie geht's?", "vi GUETS"], ["Gut, danke", "gut, DAN-ke"],
+      ["Bitte", "BI-te"], ["Danke", "DAN-ke"], ["Gern geschehen", "guern gue-SHE-en"], ["Entschuldigung", "ent-SHUL-di-gung"], ["Es tut mir leid", "es tut mir LAIT"], ["Ja", "ia"], ["Nein", "nain"],
+      ["Ich heiße…", "ij JAI-se…"], ["Wie heißt du?", "vi JAIST du"], ["Freut mich", "froit mij"], ["Sprechen Sie Spanisch?", "SHPRE-jen si SHPA-nish"], ["Ich verstehe nicht", "ij fer-SHTE-e nijt"],
+      ["Wo ist die Toilette?", "vo ist di tua-LE-te"], ["Wie viel kostet das?", "vi fil KOS-tet das"], ["Können Sie mir helfen?", "KE-nen si mir JEL-fen"], ["Wie spät ist es?", "vi SHPET ist es"],
+      ["Wasser", "VA-ser"], ["Essen", "E-sen"], ["Freund", "froint"], ["Haus", "jaus"], ["Heute", "JOI-te"], ["Morgen", "MOR-guen"],
+      ["Eins", "ains"], ["Zwei", "tsvai"], ["Drei", "drai"], ["Vier", "fir"], ["Fünf", "fünf"], ["Sechs", "seks"], ["Sieben", "SI-ben"], ["Acht", "ajt"], ["Neun", "noin"], ["Zehn", "tsen"],
+    ],
+    fr: [
+      ["Salut", "sa-LÜ"], ["Bonjour", "bon-ZHUR"], ["Bon après-midi", "bon a-pre mi-DI"], ["Bonsoir", "bon-SUAR"], ["Au revoir", "o re-VUAR"], ["À plus tard", "a plü TAR"], ["Comment ça va ?", "co-MAN sa VA"], ["Bien, merci", "bian, mer-SI"],
+      ["S'il vous plaît", "sil vu PLE"], ["Merci", "mer-SI"], ["De rien", "de RIAN"], ["Excusez-moi", "eks-kü-se MUA"], ["Je suis désolé", "zhe süi de-so-LE"], ["Oui", "ui"], ["Non", "non"],
+      ["Je m'appelle…", "zhe ma-PEL…"], ["Comment tu t'appelles ?", "co-MAN tü ta-PEL"], ["Enchanté", "an-shan-TE"], ["Parlez-vous espagnol ?", "par-le VU es-pa-ÑOL"], ["Je ne comprends pas", "zhe ne com-PRAN pa"],
+      ["Où sont les toilettes ?", "u son le tua-LET"], ["Combien ça coûte ?", "com-BIAN sa CUT"], ["Pouvez-vous m'aider ?", "pu-ve VU me-DE"], ["Quelle heure est-il ?", "kel ER e-TIL"],
+      ["Eau", "o"], ["Nourriture", "nu-ri-TÜR"], ["Ami", "a-MI"], ["Maison", "me-SON"], ["Aujourd'hui", "o-zhur-DÜI"], ["Demain", "de-MAN"],
+      ["Un", "an"], ["Deux", "de"], ["Trois", "trua"], ["Quatre", "katr"], ["Cinq", "sank"], ["Six", "sis"], ["Sept", "set"], ["Huit", "üit"], ["Neuf", "nef"], ["Dix", "dis"],
+    ],
+    it: [
+      ["Ciao", "CHA-o"], ["Buongiorno", "buon-YOR-no"], ["Buon pomeriggio", "buon po-me-RI-yo"], ["Buonasera", "buo-na-SE-ra"], ["Arrivederci", "a-rri-ve-DER-chi"], ["A dopo", "a DO-po"], ["Come stai?", "CO-me stai"], ["Bene, grazie", "BE-ne, GRA-tsie"],
+      ["Per favore", "per fa-VO-re"], ["Grazie", "GRA-tsie"], ["Prego", "PRE-go"], ["Scusi", "SCU-si"], ["Mi dispiace", "mi dis-PIA-che"], ["Sì", "si"], ["No", "no"],
+      ["Mi chiamo…", "mi KIA-mo…"], ["Come ti chiami?", "CO-me ti KIA-mi"], ["Piacere", "pia-CHE-re"], ["Parla spagnolo?", "PAR-la spa-ÑO-lo"], ["Non capisco", "non ca-PIS-co"],
+      ["Dov'è il bagno?", "do-VE il BA-ño"], ["Quanto costa?", "CUAN-to COS-ta"], ["Può aiutarmi?", "puo a-iu-TAR-mi"], ["Che ora è?", "ke O-ra e"],
+      ["Acqua", "A-cua"], ["Cibo", "CHI-bo"], ["Amico", "a-MI-co"], ["Casa", "CA-sa"], ["Oggi", "O-yi"], ["Domani", "do-MA-ni"],
+      ["Uno", "U-no"], ["Due", "DU-e"], ["Tre", "tre"], ["Quattro", "CUA-tro"], ["Cinque", "CHIN-cue"], ["Sei", "sei"], ["Sette", "SE-te"], ["Otto", "O-to"], ["Nove", "NO-ve"], ["Dieci", "DIE-chi"],
+    ],
+    uk: [
+      ["Привіт", "pri-VIT"], ["Доброго ранку", "DO-bro-jo RAN-ku"], ["Добрий день", "DO-bri den"], ["Добрий вечір", "DO-bri VE-chir"], ["До побачення", "do po-BA-chen-nia"], ["До зустрічі", "do ZUS-tri-chi"], ["Як справи?", "iak SPRA-vi"], ["Добре, дякую", "DO-bre, DIA-ku-iu"],
+      ["Будь ласка", "bud LAS-ka"], ["Дякую", "DIA-ku-iu"], ["Нема за що", "ne-MA za shcho"], ["Вибачте", "VI-bach-te"], ["Мені шкода", "me-NI SHKO-da"], ["Так", "tak"], ["Ні", "ni"],
+      ["Мене звати…", "me-NE ZVA-ti…"], ["Як тебе звати?", "iak te-BE ZVA-ti"], ["Дуже приємно", "DU-zhe pri-IEM-no"], ["Ви розмовляєте іспанською?", "vi roz-mov-LIA-ie-te is-PAN-sko-iu"], ["Я не розумію", "ia ne ro-zu-MI-iu"],
+      ["Де туалет?", "de tua-LET"], ["Скільки коштує?", "SKIL-ki KOSH-tu-ie"], ["Ви можете мені допомогти?", "vi MO-zhe-te me-NI do-po-moj-TI"], ["Котра година?", "kot-RA jo-DI-na"],
+      ["Вода", "vo-DA"], ["Їжа", "YI-zha"], ["Друг", "druj"], ["Дім", "dim"], ["Сьогодні", "sio-JOD-ni"], ["Завтра", "ZAV-tra"],
+      ["Один", "o-DIN"], ["Два", "dva"], ["Три", "tri"], ["Чотири", "cho-TI-ri"], ["П'ять", "piat"], ["Шість", "shist"], ["Сім", "sim"], ["Вісім", "VI-sim"], ["Дев'ять", "DE-viat"], ["Десять", "DE-siat"],
+    ],
+  };
+  for (const [code, list] of Object.entries(BOOK)) {
+    if (list.length !== ES.length) console.error("Cuaderno incompleto:", code, list.length);
+  }
+
+  const ALPHABET = {
+    ru: [["А", "a"], ["Б", "b"], ["В", "v"], ["Г", "g de «gato»"], ["Д", "d"], ["Е", "ie"], ["Ё", "io"], ["Ж", "zh"], ["З", "s con zumbido"], ["И", "i"], ["Й", "i breve"], ["К", "k"], ["Л", "l"], ["М", "m"], ["Н", "n"], ["О", "o"], ["П", "p"], ["Р", "r"], ["С", "s"], ["Т", "t"], ["У", "u"], ["Ф", "f"], ["Х", "j"], ["Ц", "ts"], ["Ч", "ch"], ["Ш", "sh"], ["Щ", "sh suave"], ["Ъ", "signo duro"], ["Ы", "i gutural"], ["Ь", "signo blando"], ["Э", "e"], ["Ю", "iu"], ["Я", "ia"]],
+    uk: [["А", "a"], ["Б", "b"], ["В", "v"], ["Г", "j suave"], ["Ґ", "g de «gato»"], ["Д", "d"], ["Е", "e"], ["Є", "ie"], ["Ж", "zh"], ["З", "s con zumbido"], ["И", "i grave"], ["І", "i"], ["Ї", "yi"], ["Й", "i breve"], ["К", "k"], ["Л", "l"], ["М", "m"], ["Н", "n"], ["О", "o"], ["П", "p"], ["Р", "r"], ["С", "s"], ["Т", "t"], ["У", "u"], ["Ф", "f"], ["Х", "j"], ["Ц", "ts"], ["Ч", "ch"], ["Ш", "sh"], ["Щ", "shch"], ["Ь", "signo blando"], ["Ю", "iu"], ["Я", "ia"]],
+  };
+
+  const SOUNDS = {
+    en: [
+      ["th → z", "Como la «z» de España: la punta de la lengua entre los dientes (thank you: ZENK iu)."],
+      ["h → j", "Una «j» muy suave, casi solo aire (hello: je-LOU)."],
+      ["sh", "Como cuando pides silencio: shhh."],
+      ["r", "Suave, sin hacer vibrar la lengua."],
+      ["v", "Labio inferior contra los dientes; no suena como la «b»."],
+    ],
+    ru: [
+      ["zh (ж)", "Una «y» fuerte y zumbada, como la «ll» rioplatense o la «j» francesa."],
+      ["j (х)", "Como la «j» española."],
+      ["o sin acento", "La «о» que no lleva el acento suena casi «a»: хорошо es ja-ra-SHO."],
+      ["ie (е)", "La «е» suena «ie» con el acento y casi «i» sin él."],
+      ["i gutural (ы)", "Una «i» dicha con la lengua hacia atrás. En la guía se escribe «i»."],
+    ],
+    de: [
+      ["ch → j", "Como la «j» española; después de «i» o «e» es más suave (ich: ij)."],
+      ["ü", "Di «i» con los labios en forma de «u» (fünf)."],
+      ["ö", "Di «e» con los labios en forma de «o». En la guía se escribe «e»."],
+      ["w → v", "La «w» suena como «v» (Wasser: VA-ser)."],
+      ["z → ts", "La «z» suena «ts» (zehn: tsen)."],
+      ["sch, sp-, st-", "Suenan «sh», «shp» y «sht» (spät: shpet)."],
+      ["ei, eu, ie", "«ei» suena «ai», «eu» suena «oi» y «ie» es una «i» larga."],
+    ],
+    fr: [
+      ["zh (j, g)", "Una «y» fuerte y zumbada, como la «ll» rioplatense (bonjour: bon-ZHUR)."],
+      ["ü (u)", "Di «i» con los labios en forma de «u» (salut: sa-LÜ)."],
+      ["an, on", "Vocales nasales: el aire sale por la nariz y la «n» casi no se oye."],
+      ["r", "Se pronuncia en la garganta, parecida a una «g» suave."],
+      ["letras finales", "Muchas consonantes del final no se pronuncian (salut, comprends, pas)."],
+    ],
+    it: [
+      ["c + e, i → ch", "«ce» y «ci» suenan «che» y «chi» (ciao: CHA-o). «ch» suena «k» (chiamo: KIA-mo)."],
+      ["g + e, i → y", "Una «y» fuerte (buongiorno: buon-YOR-no)."],
+      ["gn → ñ", "Igual que la «ñ» (bagno: BA-ño)."],
+      ["z → ts", "Suena «ts» (grazie: GRA-tsie)."],
+      ["letras dobles", "Las consonantes dobles se alargan un instante (sette, otto)."],
+    ],
+    uk: [
+      ["j suave (г)", "La «г» ucraniana es un soplo, como una «j» muy suave. La «g» de «gato» se escribe «ґ»."],
+      ["i grave (и)", "Una «i» corta y abierta, entre «i» y «e». En la guía se escribe «i»."],
+      ["zh (ж)", "Una «y» fuerte y zumbada, como la «ll» rioplatense."],
+      ["і, ї", "«і» es la «i» española; «ї» suena «yi»."],
+      ["o sin acento", "A diferencia del ruso, la «о» siempre suena «o»."],
+    ],
+  };
+
+  const TRIES = ["Gracias", "¿Cuánto cuesta?", "No entiendo", "Mucho gusto"];
+
+  // ---------- Utilidades ----------
+  const $ = (id) => document.getElementById(id);
+  const h = (tag, props, ...kids) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  };
+  const store = {
+    get(key, fallback) {
+      try { const v = localStorage.getItem("puente:" + key); return v == null ? fallback : JSON.parse(v); }
+      catch { return fallback; }
+    },
+    set(key, value) {
+      try { localStorage.setItem("puente:" + key, JSON.stringify(value)); } catch { /* sin almacenamiento */ }
+    },
+  };
+  const SPEAKER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
+  const phraseText = (lang, i) => (lang === "es" ? ES[i] : BOOK[lang][i][0]);
+  const phrasePron = (lang, i) => (lang === "es" ? "" : BOOK[lang][i][1]);
+
+  // Pinta "pri-VIET" como pri·VIET con la sílaba fuerte resaltada.
+  function renderPron(el, pron) {
+    el.replaceChildren();
+    pron.split(/\s+/).filter(Boolean).forEach((word, wi) => {
+      if (wi) el.append(" ");
+      word.split("-").forEach((syl, si) => {
+        if (si) el.append(h("span", { class: "dot", text: "·" }));
+        const m = /^(.*?)([,.;:…?!]*)$/.exec(syl);
+        const core = m[1], tail = m[2];
+        const strong = core && core === core.toUpperCase() && core !== core.toLowerCase();
+        el.append(strong ? h("b", { class: "stress", text: core }) : core, tail);
+      });
+    });
+  }
+
+  // ---------- Tema claro / oscuro ----------
+  const root = document.documentElement;
+  const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  const MOON = '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>';
+  function currentTheme() {
+    const t = root.getAttribute("data-theme");
+    return t === "dark" || t === "light" ? t : darkQuery.matches ? "dark" : "light";
+  }
+  function paintThemeButton() {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+    $("theme-icon").innerHTML = next === "dark" ? MOON : SUN;
+    $("theme-label").textContent = next === "dark" ? "Oscuro" : "Claro";
+    $("theme-toggle").setAttribute("aria-label", next === "dark" ? "Cambiar a modo oscuro" : "Cambiar a modo claro");
+  }
+  const savedTheme = store.get("theme", null);
+  if (savedTheme === "dark" || savedTheme === "light") root.setAttribute("data-theme", savedTheme);
+  $("theme-toggle").addEventListener("click", () => {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    store.set("theme", next);
+  });
+  new MutationObserver(paintThemeButton).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  darkQuery.addEventListener("change", paintThemeButton);
+  paintThemeButton();
+
+  // ---------- Pestañas ----------
+  const VIEWS = ["traducir", "aprender"];
+  function showView(name) {
+    for (const v of VIEWS) {
+      const on = v === name;
+      $("view-" + v).hidden = !on;
+      $("tab-" + v).setAttribute("aria-selected", String(on));
+      $("tab-" + v).tabIndex = on ? 0 : -1;
+    }
+  }
+  function viewFromHash() { return location.hash === "#aprender" ? "aprender" : "traducir"; }
+  for (const v of VIEWS) {
+    $("tab-" + v).addEventListener("click", () => {
+      showView(v);
+      try { location.hash = v; } catch { /* la vista ya cambió */ }
+    });
+    $("tab-" + v).addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      const other = VIEWS[1 - VIEWS.indexOf(v)];
+      $("tab-" + other).focus();
+      $("tab-" + other).click();
+    });
+  }
+  window.addEventListener("hashchange", () => showView(viewFromHash()));
+  showView(viewFromHash());
+
+  // ---------- Voz (la del navegador, si el dispositivo tiene una para ese idioma) ----------
+  const synth = "speechSynthesis" in window ? window.speechSynthesis : null;
+  const VOICE_TAG = { es: "es-ES", en: "en-US", ru: "ru-RU", de: "de-DE", fr: "fr-FR", it: "it-IT", uk: "uk-UA" };
+  let speakingBtn = null;
+  let currentUtterance = null;
+  function setSpeaking(btn) {
+    if (speakingBtn) speakingBtn.classList.remove("is-speaking");
+    speakingBtn = btn;
+    if (btn) btn.classList.add("is-speaking");
+  }
+  const toastEl = h("div", { class: "toast", role: "status", hidden: true });
+  document.body.append(toastEl);
+  let toastTimer = 0;
+  function toast(message) {
+    toastEl.textContent = message;
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3500);
+  }
+  function speak(btn, text, lang) {
+    if (!synth) return;
+    const wasThis = speakingBtn === btn;
+    currentUtterance = null;
+    synth.cancel();
+    setSpeaking(null);
+    if (wasThis) return; // second press on the same button stops it
+    const voices = synth.getVoices();
+    const voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase().startsWith(lang));
+    if (voices.length && !voice) {
+      toast("Este dispositivo no tiene una voz instalada para " + LANGS[lang].lower + ".");
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(text.replace(/…/g, ""));
+    u.lang = VOICE_TAG[lang];
+    if (voice) u.voice = voice;
+    u.rate = 0.85;
+    u.onend = u.onerror = () => { if (currentUtterance === u) { currentUtterance = null; setSpeaking(null); } };
+    currentUtterance = u;
+    setSpeaking(btn);
+    synth.speak(u);
+  }
+  if (synth) {
+    synth.getVoices(); // some browsers load the list only after the first call
+    document.body.classList.add("can-speak");
+  }
+
+  // ---------- Traductor ----------
+  const tr = {
+    src: store.get("src", "es"),
+    dst: store.get("dst", "ru"),
+    result: null, // {text, pron, lang}
+    busy: null,   // AbortController mientras llega la traducción
+  };
+  if (!LANGS[tr.src]) tr.src = "es";
+  if (!LANGS[tr.dst] || tr.dst === tr.src) tr.dst = tr.src === "ru" ? "es" : "ru";
+
+  const srcSel = $("src-lang"), dstSel = $("dst-lang"), input = $("source-text");
+  for (const sel of [srcSel, dstSel]) {
+    for (const code of ORDER) sel.append(h("option", { value: code, text: LANGS[code].name }));
+  }
+  srcSel.value = tr.src;
+  dstSel.value = tr.dst;
+
+  const normalize = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[¿?¡!.,;:…"'’ʼ«»()]/g, "").replace(/\s+/g, " ").trim();
+  const indexCache = {};
+  function lookup(src, dst, text) {
+    if (!indexCache[src]) {
+      indexCache[src] = new Map();
+      ES.forEach((_, i) => {
+        const key = normalize(phraseText(src, i));
+        if (!indexCache[src].has(key)) indexCache[src].set(key, i);
+      });
+    }
+    const i = indexCache[src].get(normalize(text));
+    return i == null ? null : { text: phraseText(dst, i), pron: phrasePron(dst, i), lang: dst };
+  }
+
+  function showPlaceholder(message, isError) {
+    tr.result = null;
+    const out = $("result-text");
+    out.textContent = "La traducción aparecerá aquí.";
+    out.className = "headword placeholder";
+    out.removeAttribute("lang");
+    $("result-pron").hidden = true;
+    $("result-origin").hidden = true;
+    $("result-actions").hidden = true;
+    const note = $("result-note");
+    note.hidden = !message;
+    note.textContent = message || "";
+    note.className = isError ? "note error" : "note";
+    if (message) out.textContent = "";
+  }
+  function showResult(result, origin, noteText) {
+    tr.result = result;
+    const out = $("result-text");
+    out.textContent = result.text;
+    out.className = "headword";
+    out.setAttribute("lang", result.lang);
+    const pron = $("result-pron");
+    pron.hidden = !result.pron;
+    if (result.pron) renderPron(pron, result.pron);
+    const note = $("result-note");
+    note.hidden = !noteText;
+    note.textContent = noteText || "";
+    note.className = "note";
+    $("result-origin").hidden = false;
+    $("result-origin").textContent = origin;
+    $("result-actions").hidden = false;
+  }
+  function setBusy(ctl) {
+    tr.busy = ctl;
+    $("translate-btn").textContent = ctl ? "Detener" : "Traducir";
+    $("translate-btn").classList.toggle("primary", !ctl);
+  }
+  function tryInstant() {
+    const text = input.value.trim();
+    const hit = text ? lookup(tr.src, tr.dst, text) : null;
+    if (hit) showResult(hit, "Del cuaderno de frases");
+    else showPlaceholder("");
+    return !!hit;
+  }
+
+  // Lectura aproximada del cirílico con letras del español (no marca la sílaba fuerte).
+  const CYR = {
+    "а": "a", "б": "b", "в": "v", "г": "g", "ґ": "g", "д": "d", "е": "ie", "ё": "io", "є": "ie", "ж": "zh", "з": "z",
+    "и": "i", "і": "i", "ї": "yi", "й": "i", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r",
+    "с": "s", "т": "t", "у": "u", "ф": "f", "х": "j", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "shch", "ъ": "", "ы": "i",
+    "ь": "", "э": "e", "ю": "iu", "я": "ia", "'": "", "’": "", "ʼ": "",
+  };
+  const CYR_UK = { ...CYR, "г": "j", "е": "e" };
+  function readCyrillic(text, lang) {
+    const map = lang === "uk" ? CYR_UK : CYR;
+    return text.toLowerCase()
+      .replace(/[Ѐ-ӿ'’ʼ]/g, (ch) => (ch in map ? map[ch] : ch))
+      .replace(/[?!.,;:«»"()…]/g, "")
+      .replace(/\s+/g, " ").trim();
+  }
+  const decodeEntities = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
+
+  async function translate() {
+    if (tr.busy) { tr.busy.abort(); showPlaceholder(""); return; }
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+    if (tryInstant()) return;
+
+    const ctl = new AbortController();
+    setBusy(ctl);
+    showPlaceholder("Traduciendo…");
+    const src = tr.src, dst = tr.dst;
+    try {
+      const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=" + src + "%7C" + dst;
+      const res = await fetch(url, { signal: ctl.signal });
+      if (res.status === 429) throw { code: "quota" };
+      if (!res.ok) throw { code: "network" };
+      const data = await res.json();
+      const raw = data && data.responseData && typeof data.responseData.translatedText === "string" ? data.responseData.translatedText : "";
+      const status = Number(data && data.responseStatus);
+      if (status === 429 || (data && data.quotaFinished) || /^MYMEMORY WARNING/i.test(raw)) throw { code: "quota" };
+      if (status !== 200 || !raw.trim()) throw { code: "empty" };
+      if (ctl.signal.aborted) return;
+      const translated = decodeEntities(raw).trim();
+      const cyrillic = dst === "ru" || dst === "uk";
+      showResult(
+        { text: translated, pron: cyrillic ? readCyrillic(translated, dst) : "", lang: dst },
+        "Traducción automática",
+        cyrillic ? "Lectura aproximada: no marca la sílaba fuerte." : (dst !== "es" && synth ? "Pulsa el altavoz para escuchar cómo suena." : ""),
+      );
+    } catch (e) {
+      const code = e && e.code;
+      if (ctl.signal.aborted) { /* el usuario lo detuvo o cambió el texto: ya se actualizó la vista */ }
+      else if (code === "quota") showPlaceholder("Se agotó el cupo gratuito de traducciones por hoy. Las 40 frases del cuaderno siguen funcionando.", true);
+      else if (code === "empty") showPlaceholder("No se encontró una traducción para este texto. Prueba con otra frase.", true);
+      else showPlaceholder("No se pudo conectar con el servicio de traducción. Revisa tu conexión y vuelve a intentarlo.", true);
+    } finally {
+      if (tr.busy === ctl) setBusy(null);
+    }
+  }
+
+  function cancelBusy() { if (tr.busy) tr.busy.abort(); }
+  function setLangs(src, dst) {
+    tr.src = src; tr.dst = dst;
+    srcSel.value = src; dstSel.value = dst;
+    store.set("src", src); store.set("dst", dst);
+  }
+  srcSel.addEventListener("change", () => {
+    cancelBusy();
+    setLangs(srcSel.value, srcSel.value === tr.dst ? tr.src : tr.dst);
+    tryInstant();
+  });
+  dstSel.addEventListener("change", () => {
+    cancelBusy();
+    setLangs(dstSel.value === tr.src ? tr.dst : tr.src, dstSel.value);
+    tryInstant();
+  });
+  $("swap-langs").addEventListener("click", () => {
+    cancelBusy();
+    const moved = tr.result ? tr.result.text : null;
+    setLangs(tr.dst, tr.src);
+    if (moved) { input.value = moved; updateCount(); }
+    tryInstant();
+  });
+  function updateCount() { $("char-count").textContent = input.value.length + " / 300"; }
+  input.addEventListener("input", () => { updateCount(); cancelBusy(); tryInstant(); });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); translate(); }
+  });
+  $("translate-btn").addEventListener("click", translate);
+  $("result-speak").addEventListener("click", (e) => {
+    if (tr.result) speak(e.currentTarget, tr.result.text, tr.result.lang);
+  });
+  $("result-copy").addEventListener("click", async (e) => {
+    if (!tr.result) return;
+    const btn = e.currentTarget;
+    try {
+      await navigator.clipboard.writeText(tr.result.text);
+      btn.classList.add("is-speaking");
+      setTimeout(() => btn.classList.remove("is-speaking"), 900);
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents($("result-text"));
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  });
+  for (const phrase of TRIES) {
+    $("try-chips").append(h("button", {
+      type: "button", class: "chip", text: phrase,
+      onclick: () => {
+        cancelBusy();
+        if (tr.src !== "es") setLangs("es", tr.dst === "es" ? tr.src : tr.dst);
+        input.value = phrase;
+        updateCount();
+        tryInstant();
+      },
+    }));
+  }
+  updateCount();
+  tryInstant();
+
+  // ---------- Aprender ----------
+  const learn = {
+    lang: store.get("learnLang", "ru"),
+    cat: store.get("learnCat", "saludos"),
+    mode: "frases",
+    known: store.get("known", {}),
+    deck: null, // {ids, pos, revealed, again}
+  };
+  if (!LEARN.includes(learn.lang)) learn.lang = "ru";
+  if (!CATS.some((c) => c.id === learn.cat)) learn.cat = "saludos";
+  if (!learn.known || typeof learn.known !== "object") learn.known = {};
+
+  const knownList = (lang) => (Array.isArray(learn.known[lang]) ? learn.known[lang] : []);
+  const isKnown = (lang, i) => knownList(lang).includes(i);
+  function setKnown(lang, i, yes) {
+    const set = new Set(knownList(lang));
+    if (yes) set.add(i); else set.delete(i);
+    learn.known[lang] = [...set];
+    store.set("known", learn.known);
+  }
+  function catIds() {
+    const c = CATS.find((x) => x.id === learn.cat);
+    return Array.from({ length: c.to - c.from }, (_, k) => c.from + k);
+  }
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+  function buildDeck() {
+    const ids = catIds();
+    const pending = ids.filter((i) => !isKnown(learn.lang, i));
+    learn.deck = { ids: shuffle((pending.length ? pending : ids).slice()), pos: 0, revealed: false, again: 0, review: !pending.length };
+  }
+  function speakButton(text, lang, label) {
+    const btn = h("button", { type: "button", class: "icon-btn small speak", "aria-label": label });
+    btn.innerHTML = SPEAKER_ICON;
+    btn.addEventListener("click", () => speak(btn, text, lang));
+    return btn;
+  }
+
+  function renderLearnChrome() {
+    const lang = learn.lang;
+    $("learn-lang-name").textContent = LANGS[lang].lower;
+    const n = knownList(lang).length;
+    $("progress-text").textContent = n + " de " + ES.length + " frases aprendidas";
+    $("progress-bar").style.width = (100 * n / ES.length) + "%";
+
+    $("lang-chips").replaceChildren(...LEARN.map((code) => h("button", {
+      type: "button", class: "chip", "aria-pressed": String(code === lang), lang: code,
+      onclick: () => { learn.lang = code; store.set("learnLang", code); learn.deck = null; renderLearn(); },
+    }, LANGS[code].native, h("small", { lang: "es", text: LANGS[code].lower }))));
+
+    const third = ALPHABET[lang] ? "Alfabeto" : "Sonidos";
+    $("mode-buttons").replaceChildren(...[["frases", "Frases"], ["practica", "Práctica"], ["sonidos", third]].map(([id, label]) => h("button", {
+      type: "button", "aria-pressed": String(learn.mode === id), text: label,
+      onclick: () => { learn.mode = id; learn.deck = null; renderLearn(); },
+    })));
+
+    $("cat-chips").hidden = learn.mode === "sonidos";
+    $("cat-chips").replaceChildren(...CATS.map((c) => h("button", {
+      type: "button", class: "chip", "aria-pressed": String(c.id === learn.cat), text: c.name,
+      onclick: () => { learn.cat = c.id; store.set("learnCat", c.id); learn.deck = null; renderLearn(); },
+    })));
+  }
+
+  function renderPhrases(body) {
+    const lang = learn.lang;
+    const legend = h("p", { class: "legend" }, "Entre corchetes va la pronunciación escrita como se leería en español. La sílaba resaltada, como ", h("b", { text: "VIET" }), ", es la que suena más fuerte.");
+    const list = h("ul", { class: "entries" }, catIds().map((i) => {
+      const pron = h("span", { class: "pron" });
+      renderPron(pron, phrasePron(lang, i));
+      return h("li", { class: "entry" },
+        h("div", { class: "text" },
+          h("span", { class: "es" }, ES[i], isKnown(lang, i) ? h("span", { class: "known", text: "✓ aprendida" }) : null),
+          h("span", { class: "headword", lang, text: phraseText(lang, i) }),
+          pron),
+        speakButton(phraseText(lang, i), lang, "Escuchar «" + phraseText(lang, i) + "»"));
+    }));
+    body.replaceChildren(legend, list);
+  }
+
+  function renderPractice(body, focus) {
+    const lang = learn.lang;
+    if (!learn.deck) buildDeck();
+    const d = learn.deck;
+    const card = h("div", { class: "card" });
+
+    if (d.pos >= d.ids.length) {
+      const ids = catIds();
+      const got = ids.filter((i) => isKnown(lang, i)).length;
+      const again = h("button", { type: "button", class: "btn primary", text: got === ids.length ? "Repasar todo otra vez" : "Otra ronda", onclick: () => { buildDeck(); renderPractice(body, true); } });
+      card.append(
+        h("p", { class: "step", text: "Ronda terminada" }),
+        h("p", { class: "prompt", text: "Sabes " + got + " de " + ids.length + " en este tema." }),
+        h("p", { class: "note answer", text: d.again ? "Quedaron " + d.again + " para repasar. Volverán a salir en la próxima ronda." : "No dejaste ninguna para repasar." }),
+        h("div", { class: "buttons" }, again));
+      body.replaceChildren(card);
+      if (focus) again.focus();
+      return;
+    }
+
+    const i = d.ids[d.pos];
+    card.append(
+      h("p", { class: "step", text: (d.pos + 1) + " de " + d.ids.length + (d.review ? " · repaso" : "") }),
+      h("p", { class: "prompt", text: ES[i] }));
+    let main;
+    if (!d.revealed) {
+      main = h("button", { type: "button", class: "btn primary", text: "Ver en " + LANGS[lang].lower, onclick: () => { d.revealed = true; renderPractice(body, true); } });
+      card.append(h("p", { class: "note answer", text: "Dila en voz alta antes de mirar." }), h("div", { class: "buttons" }, main));
+    } else {
+      const pron = h("span", { class: "pron" });
+      renderPron(pron, phrasePron(lang, i));
+      const next = (yes) => () => {
+        setKnown(lang, i, yes);
+        if (!yes) d.again++;
+        d.pos++; d.revealed = false;
+        renderLearnChrome();
+        renderPractice(body, true);
+      };
+      main = h("button", { type: "button", class: "btn good", text: "La sé", onclick: next(true) });
+      card.append(
+        h("div", { class: "answer" },
+          h("div", { class: "row" },
+            h("span", { class: "headword", lang, text: phraseText(lang, i) }),
+            speakButton(phraseText(lang, i), lang, "Escuchar «" + phraseText(lang, i) + "»")),
+          pron),
+        h("div", { class: "buttons" },
+          h("button", { type: "button", class: "btn", text: "Repasar luego", onclick: next(false) }),
+          main));
+    }
+    body.replaceChildren(card);
+    if (focus) main.focus();
+  }
+
+  function renderSounds(body) {
+    const lang = learn.lang;
+    const parts = [];
+    if (ALPHABET[lang]) {
+      parts.push(
+        h("p", { class: "legend", text: "El alfabeto cirílico del " + LANGS[lang].lower + " tiene " + ALPHABET[lang].length + " letras. Debajo de cada una está el sonido más parecido en español." }),
+        h("div", { class: "alphabet" }, ALPHABET[lang].map(([letter, sound]) => h("div", { class: "letter" },
+          h("b", { lang, text: letter + " " + letter.toLowerCase() }),
+          h("span", { text: sound })))),
+        h("p", { class: "subhead", text: "Sonidos que no existen en español" }));
+    } else {
+      parts.push(h("p", { class: "legend", text: "Estas son las claves para leer la pronunciación del " + LANGS[lang].lower + " en este cuaderno." }));
+    }
+    parts.push(h("ul", { class: "sounds" }, SOUNDS[lang].map(([sign, text]) => h("li", null, h("b", { text: sign }), h("span", { text })))));
+    body.replaceChildren(...parts);
+  }
+
+  function renderLearn() {
+    renderLearnChrome();
+    const body = $("learn-body");
+    if (learn.mode === "practica") renderPractice(body, false);
+    else if (learn.mode === "sonidos") renderSounds(body);
+    else renderPhrases(body);
+  }
+  renderLearn();
+})();
+</script>
+</body>
+</html>
