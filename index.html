@@ -6,10 +6,13 @@
 <title>Puente de Idiomas</title>
 <meta name="description" content="Traduce y aprende frases sencillas desde el español: inglés, ruso, alemán, francés, italiano, ucraniano, portugués y japonés, con su pronunciación.">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#2443c9">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232443c9'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='30' font-weight='700' text-anchor='middle' fill='white'%3E%C3%B1%D1%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&family=Onest:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&family=Onest:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: una columna, como un cuaderno de frases. Cada frase es una entrada de
    diccionario (palabra, [pronunciación]); solo los dos paneles del traductor y la
@@ -353,7 +356,7 @@ body.can-speak .speak { display: inline-flex; }
         <span>Prueba con</span>
         <div id="try-chips" class="chips small"></div>
       </div>
-      <p class="fineprint">Las frases del cuaderno se traducen al instante y sin conexión. Cualquier otro texto se envía al servicio gratuito MyMemory para traducirlo, así que no escribas datos personales.</p>
+      <p class="fineprint">Las frases del cuaderno se traducen al instante y sin conexión. Cualquier otro texto se envía al servicio gratuito MyMemory para traducirlo, así que no escribas datos personales. Después de la primera visita, la app se abre también sin internet, y puedes instalarla desde el menú del navegador.</p>
     </section>
 
     <section id="view-aprender" class="view" role="tabpanel" aria-labelledby="tab-aprender" hidden>
@@ -868,6 +871,7 @@ body.can-speak .speak { display: inline-flex; }
       if (ctl.signal.aborted) { /* el usuario lo detuvo o cambió el texto: ya se actualizó la vista */ }
       else if (code === "quota") showPlaceholder("Se agotó el cupo gratuito de traducciones por hoy. Las frases del cuaderno siguen funcionando.", true);
       else if (code === "empty") showPlaceholder("No se encontró una traducción para este texto. Prueba con otra frase.", true);
+      else if (navigator.onLine === false) showPlaceholder("Estás sin conexión. Las frases del cuaderno siguen funcionando; para traducir otros textos hace falta internet.");
       else showPlaceholder("No se pudo conectar con el servicio de traducción. Revisa tu conexión y vuelve a intentarlo.", true);
     } finally {
       if (tr.busy === ctl) setBusy(null);
@@ -1102,6 +1106,22 @@ body.can-speak .speak { display: inline-flex; }
     else renderPhrases(body);
   }
   renderLearn();
+
+  // ---------- Sin conexión ----------
+  // sw.js guarda la app. En la primera visita las tipografías se cargan antes de
+  // que el worker controle la página, así que se le pasan para que las guarde.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js")
+        .then(() => navigator.serviceWorker.ready)
+        .then((registration) => {
+          const fonts = performance.getEntriesByType("resource").map((entry) => entry.name)
+            .filter((url) => /^https:\/\/fonts\.(googleapis|gstatic)\.com\//.test(url));
+          if (registration.active && fonts.length) registration.active.postMessage({ cacheUrls: fonts });
+        })
+        .catch(() => { /* sin service worker la app funciona igual, solo con conexión */ });
+    });
+  }
 })();
 </script>
 </body>

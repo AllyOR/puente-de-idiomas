@@ -29,13 +29,30 @@ Una app web sencilla para traducir y aprender frases básicas desde el español.
 - En las traducciones automáticas al ruso y al ucraniano, la pronunciación es una
   lectura aproximada letra por letra y no marca la sílaba fuerte. En los demás idiomas,
   incluido el japonés, la traducción automática no trae guía escrita.
-- El botón del altavoz usa la voz del propio navegador; solo suena si el dispositivo
-  tiene una voz instalada para ese idioma.
+- El botón del altavoz usa la voz del propio navegador y siempre elige una voz del
+  idioma de la frase. Si el dispositivo no tiene una voz instalada para ese idioma,
+  avisa en vez de leerla con otra.
+
+## Sin conexión
+
+Después de la primera visita con internet, la app se abre también sin conexión, y se
+puede instalar desde el menú del navegador ("Instalar" o "Añadir a pantalla de inicio").
+
+- Sin internet funcionan el cuaderno de frases, la práctica, los alfabetos y la
+  traducción de las frases del cuaderno.
+- La traducción de cualquier otro texto necesita internet.
+- El altavoz funciona sin internet solo con las voces guardadas en el dispositivo.
 
 ## Cómo está hecha
 
-Todo vive en `index.html`: HTML, CSS y JavaScript sin dependencias ni paso de compilación.
-Las tipografías se cargan de Google Fonts.
+La app vive en `index.html`: HTML, CSS y JavaScript sin dependencias ni paso de
+compilación. Las tipografías se cargan de Google Fonts.
+
+- `sw.js` es el service worker que guarda la app y las tipografías para usarlas sin
+  conexión. Pide los archivos primero a la red, así que las actualizaciones llegan al
+  recargar con internet.
+- `manifest.webmanifest` y los iconos `icon-192.png`, `icon-512.png` y
+  `apple-touch-icon.png` permiten instalarla. Los iconos salen de `icon.svg`.
 
 Para probarla en local:
 
