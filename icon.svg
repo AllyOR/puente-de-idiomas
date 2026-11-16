@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fuente de icon-192.png, icon-512.png y apple-touch-icon.png. Fondo a sangre
+       y texto dentro del 60 % central, para que sirva también como icono "maskable". -->
+  <rect width="512" height="512" fill="#2443c9"/>
+  <text x="256" y="322" font-family="Georgia, 'Times New Roman', serif" font-size="190" font-weight="700" text-anchor="middle" fill="#ffffff">ñя</text>
+</svg>
