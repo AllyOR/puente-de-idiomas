@@ -690,32 +690,54 @@ body.can-speak .speak { display: inline-flex; }
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3500);
   }
-  function speak(btn, text, lang) {
+  // The voice list arrives late in most browsers. Speaking before it is there, or
+  // without choosing a voice, lets the browser read every language with its default
+  // (usually English) voice, so wait for the list and always pick a voice of the
+  // phrase's own language.
+  let voices = synth ? synth.getVoices() : [];
+  if (synth) synth.addEventListener("voiceschanged", () => { voices = synth.getVoices(); });
+  function voicesReady() {
+    if (voices.length) return Promise.resolve();
+    return new Promise((resolve) => {
+      const done = () => { voices = synth.getVoices(); resolve(); };
+      synth.addEventListener("voiceschanged", done, { once: true });
+      setTimeout(done, 1200);
+    });
+  }
+  const voiceLang = (v) => v.lang.replace("_", "-").toLowerCase();
+  function pickVoice(lang) {
+    const tag = VOICE_TAG[lang].toLowerCase();
+    const matches = voices.filter((v) => voiceLang(v).split("-")[0] === lang);
+    // Exact region first (pt-BR before pt-PT); offline, voices stored on the device first.
+    const score = (v) => (voiceLang(v) === tag ? 2 : 0) + (!navigator.onLine && v.localService ? 4 : 0);
+    return matches.sort((a, b) => score(b) - score(a))[0] || null;
+  }
+  async function speak(btn, text, lang) {
     if (!synth) return;
     const wasThis = speakingBtn === btn;
     currentUtterance = null;
     synth.cancel();
     setSpeaking(null);
     if (wasThis) return; // second press on the same button stops it
-    const voices = synth.getVoices();
-    const voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase().startsWith(lang));
+    setSpeaking(btn);
+    await voicesReady();
+    if (speakingBtn !== btn) return; // another button was pressed while waiting
+    const voice = pickVoice(lang);
     if (voices.length && !voice) {
-      toast("Este dispositivo no tiene una voz instalada para " + LANGS[lang].lower + ".");
+      setSpeaking(null);
+      toast("Este dispositivo no tiene una voz instalada para leer en " + LANGS[lang].lower + ".");
       return;
     }
     const u = new SpeechSynthesisUtterance(text.replace(/…/g, ""));
-    u.lang = VOICE_TAG[lang];
+    // No list at all (some Android browsers): the engine chooses by the language tag.
+    u.lang = voice ? voice.lang.replace("_", "-") : VOICE_TAG[lang];
     if (voice) u.voice = voice;
     u.rate = 0.85;
     u.onend = u.onerror = () => { if (currentUtterance === u) { currentUtterance = null; setSpeaking(null); } };
     currentUtterance = u;
-    setSpeaking(btn);
     synth.speak(u);
   }
-  if (synth) {
-    synth.getVoices(); // some browsers load the list only after the first call
-    document.body.classList.add("can-speak");
-  }
+  if (synth) document.body.classList.add("can-speak");
 
   // ---------- Traductor ----------
   const tr = {
