@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Puente de Idiomas</title>
-<meta name="description" content="Traduce y aprende frases sencillas desde el español: inglés, ruso, alemán, francés, italiano y ucraniano, con su pronunciación.">
+<meta name="description" content="Traduce y aprende frases sencillas desde el español: inglés, ruso, alemán, francés, italiano, ucraniano, portugués y japonés, con su pronunciación.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232443c9'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='30' font-weight='700' text-anchor='middle' fill='white'%3E%C3%B1%D1%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +28,7 @@
   --ok: #17734d;
   --danger: #b3261e;
   --font-ui: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-word: "Literata", Georgia, "Times New Roman", serif;
+  --font-word: "Literata", Georgia, "Times New Roman", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", serif;
   --font-pron: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   --radius: 14px;
 }
@@ -353,7 +353,7 @@ body.can-speak .speak { display: inline-flex; }
         <span>Prueba con</span>
         <div id="try-chips" class="chips small"></div>
       </div>
-      <p class="fineprint">Las 40 frases del cuaderno se traducen al instante y sin conexión. Cualquier otro texto se envía al servicio gratuito MyMemory para traducirlo, así que no escribas datos personales.</p>
+      <p class="fineprint">Las frases del cuaderno se traducen al instante y sin conexión. Cualquier otro texto se envía al servicio gratuito MyMemory para traducirlo, así que no escribas datos personales.</p>
     </section>
 
     <section id="view-aprender" class="view" role="tabpanel" aria-labelledby="tab-aprender" hidden>
@@ -385,9 +385,11 @@ body.can-speak .speak { display: inline-flex; }
     fr: { name: "Francés", lower: "francés", native: "Français" },
     it: { name: "Italiano", lower: "italiano", native: "Italiano" },
     uk: { name: "Ucraniano", lower: "ucraniano", native: "Українська" },
+    pt: { name: "Portugués", lower: "portugués", native: "Português" },
+    ja: { name: "Japonés", lower: "japonés", native: "日本語" },
   };
-  const ORDER = ["es", "en", "ru", "de", "fr", "it", "uk"];
-  const LEARN = ["en", "ru", "de", "fr", "it", "uk"];
+  const ORDER = ["es", "en", "ru", "de", "fr", "it", "uk", "pt", "ja"];
+  const LEARN = ["en", "ru", "de", "fr", "it", "uk", "pt", "ja"];
 
   const ES = [
     "Hola", "Buenos días", "Buenas tardes", "Buenas noches", "Adiós", "Hasta luego", "¿Cómo estás?", "Bien, gracias",
@@ -396,15 +398,19 @@ body.can-speak .speak { display: inline-flex; }
     "¿Dónde está el baño?", "¿Cuánto cuesta?", "¿Puede ayudarme?", "¿Qué hora es?",
     "Agua", "Comida", "Amigo", "Casa", "Hoy", "Mañana",
     "Uno", "Dos", "Tres", "Cuatro", "Cinco", "Seis", "Siete", "Ocho", "Nueve", "Diez",
+    "La cuenta, por favor", "Quisiera un café", "Tengo hambre", "¡Salud!", "Necesito un médico", "¿Dónde está la estación?", "A la derecha", "A la izquierda",
+    "Me gusta", "Te quiero", "¡Feliz cumpleaños!", "¡Buen viaje!",
   ];
   const CATS = [
-    { id: "todas", name: "Todas", from: 0, to: 40 },
+    { id: "todas", name: "Todas", from: 0, to: 52 },
     { id: "saludos", name: "Saludos", from: 0, to: 8 },
     { id: "cortesia", name: "Cortesía", from: 8, to: 15 },
     { id: "conversar", name: "Conversar", from: 15, to: 20 },
     { id: "preguntas", name: "Preguntas", from: 20, to: 24 },
     { id: "palabras", name: "Palabras", from: 24, to: 30 },
     { id: "numeros", name: "Números", from: 30, to: 40 },
+    { id: "viaje", name: "De viaje", from: 40, to: 48 },
+    { id: "expresiones", name: "Expresiones", from: 48, to: 52 },
   ];
 
   // [texto en el idioma, pronunciación escrita para hispanohablantes; MAYÚSCULAS = sílaba fuerte]
@@ -416,6 +422,8 @@ body.can-speak .speak { display: inline-flex; }
       ["Where is the bathroom?", "uer is de BAZ-rum"], ["How much is it?", "jau MACH is it"], ["Can you help me?", "kan iu JELP mi"], ["What time is it?", "uat TAIM is it"],
       ["Water", "UO-ter"], ["Food", "fud"], ["Friend", "frend"], ["House", "jaus"], ["Today", "tu-DEI"], ["Tomorrow", "tu-MO-rou"],
       ["One", "uan"], ["Two", "tu"], ["Three", "zri"], ["Four", "for"], ["Five", "faiv"], ["Six", "siks"], ["Seven", "SE-ven"], ["Eight", "eit"], ["Nine", "nain"], ["Ten", "ten"],
+      ["The check, please", "de CHEK, plis"], ["I'd like a coffee", "aid laik a CO-fi"], ["I'm hungry", "aim JAN-gri"], ["Cheers!", "chirs"], ["I need a doctor", "ai nid a DOC-tor"], ["Where is the station?", "uer is de STEI-shon"], ["To the right", "tu de RAIT"], ["To the left", "tu de LEFT"],
+      ["I like it", "ai LAIK it"], ["I love you", "ai LAV iu"], ["Happy birthday!", "JA-pi BERZ-dei"], ["Have a good trip!", "jav a gud TRIP"],
     ],
     ru: [
       ["Привет", "pri-VIET"], ["Доброе утро", "DO-bra-ie U-tra"], ["Добрый день", "DO-bri dien"], ["Добрый вечер", "DO-bri VIE-chir"], ["До свидания", "da svi-DA-ni-ia"], ["Пока", "pa-KA"], ["Как дела?", "kak di-LA"], ["Хорошо, спасибо", "ja-ra-SHO, spa-SI-ba"],
@@ -424,6 +432,8 @@ body.can-speak .speak { display: inline-flex; }
       ["Где туалет?", "gdie tua-LIET"], ["Сколько стоит?", "SKOL-ka STO-it"], ["Вы можете мне помочь?", "vi MO-zhi-tie mnie pa-MOCH"], ["Который час?", "ka-TO-ri chas"],
       ["Вода", "va-DA"], ["Еда", "ie-DA"], ["Друг", "druk"], ["Дом", "dom"], ["Сегодня", "si-VOD-nia"], ["Завтра", "ZAF-tra"],
       ["Один", "a-DIN"], ["Два", "dva"], ["Три", "tri"], ["Четыре", "chi-TI-rie"], ["Пять", "piat"], ["Шесть", "shest"], ["Семь", "siem"], ["Восемь", "VO-sim"], ["Девять", "DIE-vit"], ["Десять", "DIE-sit"],
+      ["Счёт, пожалуйста", "shiot, pa-ZHA-lus-ta"], ["Можно кофе, пожалуйста?", "MOZH-na KO-fie, pa-ZHA-lus-ta"], ["Я хочу есть", "ia ja-CHU iest"], ["За здоровье!", "za zda-RO-vie"], ["Мне нужен врач", "mnie NU-zhen vrach"], ["Где вокзал?", "gdie vak-ZAL"], ["Направо", "na-PRA-va"], ["Налево", "na-LIE-va"],
+      ["Мне нравится", "mnie NRA-vi-tsa"], ["Я тебя люблю", "ia ti-BIA liu-BLIU"], ["С днём рождения!", "s dniom razh-DIE-ni-ia"], ["Счастливого пути!", "shis-LI-va-va pu-TI"],
     ],
     de: [
       ["Hallo", "JA-lo"], ["Guten Morgen", "GU-ten MOR-guen"], ["Guten Tag", "GU-ten tak"], ["Guten Abend", "GU-ten A-bent"], ["Auf Wiedersehen", "auf VI-der-se-en"], ["Bis später", "bis SHPE-ter"], ["Wie geht's?", "vi GUETS"], ["Gut, danke", "gut, DAN-ke"],
@@ -432,6 +442,8 @@ body.can-speak .speak { display: inline-flex; }
       ["Wo ist die Toilette?", "vo ist di tua-LE-te"], ["Wie viel kostet das?", "vi fil KOS-tet das"], ["Können Sie mir helfen?", "KE-nen si mir JEL-fen"], ["Wie spät ist es?", "vi SHPET ist es"],
       ["Wasser", "VA-ser"], ["Essen", "E-sen"], ["Freund", "froint"], ["Haus", "jaus"], ["Heute", "JOI-te"], ["Morgen", "MOR-guen"],
       ["Eins", "ains"], ["Zwei", "tsvai"], ["Drei", "drai"], ["Vier", "fir"], ["Fünf", "fünf"], ["Sechs", "seks"], ["Sieben", "SI-ben"], ["Acht", "ajt"], ["Neun", "noin"], ["Zehn", "tsen"],
+      ["Die Rechnung, bitte", "di REJ-nung, BI-te"], ["Ich hätte gern einen Kaffee", "ij JE-te guern AI-nen KA-fe"], ["Ich habe Hunger", "ij JA-be JUN-guer"], ["Prost!", "prost"], ["Ich brauche einen Arzt", "ij BRAU-je AI-nen artst"], ["Wo ist der Bahnhof?", "vo ist der BAN-jof"], ["Nach rechts", "naj rejts"], ["Nach links", "naj links"],
+      ["Das gefällt mir", "das gue-FELT mir"], ["Ich liebe dich", "ij LI-be dij"], ["Alles Gute zum Geburtstag!", "A-les GU-te tsum gue-BURTS-tak"], ["Gute Reise!", "GU-te RAI-se"],
     ],
     fr: [
       ["Salut", "sa-LÜ"], ["Bonjour", "bon-ZHUR"], ["Bon après-midi", "bon a-pre mi-DI"], ["Bonsoir", "bon-SUAR"], ["Au revoir", "o re-VUAR"], ["À plus tard", "a plü TAR"], ["Comment ça va ?", "co-MAN sa VA"], ["Bien, merci", "bian, mer-SI"],
@@ -440,6 +452,8 @@ body.can-speak .speak { display: inline-flex; }
       ["Où sont les toilettes ?", "u son le tua-LET"], ["Combien ça coûte ?", "com-BIAN sa CUT"], ["Pouvez-vous m'aider ?", "pu-ve VU me-DE"], ["Quelle heure est-il ?", "kel ER e-TIL"],
       ["Eau", "o"], ["Nourriture", "nu-ri-TÜR"], ["Ami", "a-MI"], ["Maison", "me-SON"], ["Aujourd'hui", "o-zhur-DÜI"], ["Demain", "de-MAN"],
       ["Un", "an"], ["Deux", "de"], ["Trois", "trua"], ["Quatre", "katr"], ["Cinq", "sank"], ["Six", "sis"], ["Sept", "set"], ["Huit", "üit"], ["Neuf", "nef"], ["Dix", "dis"],
+      ["L'addition, s'il vous plaît", "la-di-SION, sil vu PLE"], ["Je voudrais un café", "zhe vu-DRE an ca-FE"], ["J'ai faim", "zhe FAN"], ["Santé !", "san-TE"], ["J'ai besoin d'un médecin", "zhe be-SUAN dan med-SAN"], ["Où est la gare ?", "u e la GAR"], ["À droite", "a DRUAT"], ["À gauche", "a GOSH"],
+      ["J'aime ça", "zhem SA"], ["Je t'aime", "zhe TEM"], ["Joyeux anniversaire !", "zhua-IE sa-ni-ver-SER"], ["Bon voyage !", "bon vua-IAZH"],
     ],
     it: [
       ["Ciao", "CHA-o"], ["Buongiorno", "buon-YOR-no"], ["Buon pomeriggio", "buon po-me-RI-yo"], ["Buonasera", "buo-na-SE-ra"], ["Arrivederci", "a-rri-ve-DER-chi"], ["A dopo", "a DO-po"], ["Come stai?", "CO-me stai"], ["Bene, grazie", "BE-ne, GRA-tsie"],
@@ -448,6 +462,8 @@ body.can-speak .speak { display: inline-flex; }
       ["Dov'è il bagno?", "do-VE il BA-ño"], ["Quanto costa?", "CUAN-to COS-ta"], ["Può aiutarmi?", "puo a-iu-TAR-mi"], ["Che ora è?", "ke O-ra e"],
       ["Acqua", "A-cua"], ["Cibo", "CHI-bo"], ["Amico", "a-MI-co"], ["Casa", "CA-sa"], ["Oggi", "O-yi"], ["Domani", "do-MA-ni"],
       ["Uno", "U-no"], ["Due", "DU-e"], ["Tre", "tre"], ["Quattro", "CUA-tro"], ["Cinque", "CHIN-cue"], ["Sei", "sei"], ["Sette", "SE-te"], ["Otto", "O-to"], ["Nove", "NO-ve"], ["Dieci", "DIE-chi"],
+      ["Il conto, per favore", "il CON-to, per fa-VO-re"], ["Vorrei un caffè", "vo-RREI un ca-FE"], ["Ho fame", "o FA-me"], ["Salute!", "sa-LU-te"], ["Ho bisogno di un medico", "o bi-SO-ño di un ME-di-co"], ["Dov'è la stazione?", "do-VE la sta-TSIO-ne"], ["A destra", "a DES-tra"], ["A sinistra", "a si-NIS-tra"],
+      ["Mi piace", "mi PIA-che"], ["Ti amo", "ti A-mo"], ["Buon compleanno!", "buon com-ple-A-no"], ["Buon viaggio!", "buon VIA-yo"],
     ],
     uk: [
       ["Привіт", "pri-VIT"], ["Доброго ранку", "DO-bro-jo RAN-ku"], ["Добрий день", "DO-bri den"], ["Добрий вечір", "DO-bri VE-chir"], ["До побачення", "do po-BA-chen-nia"], ["До зустрічі", "do ZUS-tri-chi"], ["Як справи?", "iak SPRA-vi"], ["Добре, дякую", "DO-bre, DIA-ku-iu"],
@@ -456,6 +472,30 @@ body.can-speak .speak { display: inline-flex; }
       ["Де туалет?", "de tua-LET"], ["Скільки коштує?", "SKIL-ki KOSH-tu-ie"], ["Ви можете мені допомогти?", "vi MO-zhe-te me-NI do-po-moj-TI"], ["Котра година?", "kot-RA jo-DI-na"],
       ["Вода", "vo-DA"], ["Їжа", "YI-zha"], ["Друг", "druj"], ["Дім", "dim"], ["Сьогодні", "sio-JOD-ni"], ["Завтра", "ZAV-tra"],
       ["Один", "o-DIN"], ["Два", "dva"], ["Три", "tri"], ["Чотири", "cho-TI-ri"], ["П'ять", "piat"], ["Шість", "shist"], ["Сім", "sim"], ["Вісім", "VI-sim"], ["Дев'ять", "DE-viat"], ["Десять", "DE-siat"],
+      ["Рахунок, будь ласка", "ra-JU-nok, bud LAS-ka"], ["Можна каву, будь ласка?", "MOZH-na KA-vu, bud LAS-ka"], ["Я хочу їсти", "ia JO-chu YIS-ti"], ["Будьмо!", "BUD-mo"], ["Мені потрібен лікар", "me-NI po-TRI-ben LI-kar"], ["Де вокзал?", "de vok-ZAL"], ["Праворуч", "pra-VO-ruch"], ["Ліворуч", "li-VO-ruch"],
+      ["Мені подобається", "me-NI po-DO-ba-iet-sia"], ["Я тебе кохаю", "ia te-BE ko-JA-iu"], ["З днем народження!", "z dnem na-RO-dzhen-nia"], ["Щасливої дороги!", "shchas-LI-vo-yi do-RO-ji"],
+    ],
+    // Portugués de Brasil. «Obrigado» lo dicen los hombres; las mujeres dicen «obrigada».
+    pt: [
+      ["Olá", "o-LA"], ["Bom dia", "bon YI-a"], ["Boa tarde", "BO-a TAR-yi"], ["Boa noite", "BO-a NOI-chi"], ["Tchau", "chau"], ["Até logo", "a-TE LO-gu"], ["Como vai?", "CO-mu vai"], ["Bem, obrigado", "bein, o-bri-GA-du"],
+      ["Por favor", "por fa-VOR"], ["Obrigado", "o-bri-GA-du"], ["De nada", "yi NA-da"], ["Com licença", "con li-SEN-sa"], ["Sinto muito", "SIN-tu MUIN-tu"], ["Sim", "sin"], ["Não", "naun"],
+      ["Meu nome é…", "meu NO-mi e…"], ["Como você se chama?", "CO-mu vo-SE si SHA-ma"], ["Muito prazer", "MUIN-tu pra-SER"], ["Você fala espanhol?", "vo-SE FA-la es-pa-ÑOL"], ["Não entendo", "naun en-TEN-du"],
+      ["Onde fica o banheiro?", "ON-yi FI-ca u ba-ÑEI-ru"], ["Quanto custa?", "CUAN-tu CUS-ta"], ["Pode me ajudar?", "PO-yi mi a-zhu-DAR"], ["Que horas são?", "ki O-ras saun"],
+      ["Água", "A-gua"], ["Comida", "co-MI-da"], ["Amigo", "a-MI-gu"], ["Casa", "CA-sa"], ["Hoje", "O-zhi"], ["Amanhã", "a-ma-ÑAN"],
+      ["Um", "un"], ["Dois", "dois"], ["Três", "tres"], ["Quatro", "CUA-tru"], ["Cinco", "SIN-cu"], ["Seis", "seis"], ["Sete", "SE-chi"], ["Oito", "OI-tu"], ["Nove", "NO-vi"], ["Dez", "des"],
+      ["A conta, por favor", "a CON-ta, por fa-VOR"], ["Eu queria um café", "eu ke-RI-a un ca-FE"], ["Estou com fome", "es-TOU con FO-mi"], ["Saúde!", "sa-U-yi"], ["Preciso de um médico", "pre-SI-su yi un ME-yi-cu"], ["Onde fica a estação?", "ON-yi FI-ca a es-ta-SAUN"], ["À direita", "a yi-REI-ta"], ["À esquerda", "a es-KER-da"],
+      ["Eu gosto", "eu GOS-tu"], ["Eu te amo", "eu chi A-mu"], ["Feliz aniversário!", "fe-LIS a-ni-ver-SA-riu"], ["Boa viagem!", "BO-a vi-A-zhen"],
+    ],
+    // Japonés: sin sílaba fuerte, por eso la guía va toda en minúsculas. Vocal doble = vocal larga.
+    ja: [
+      ["こんにちは", "kon-ni-chi-ua"], ["おはようございます", "o-ja-yoo go-zai-mas"], ["こんにちは", "kon-ni-chi-ua"], ["こんばんは", "kon-ban-ua"], ["さようなら", "sa-yoo-na-ra"], ["またね", "ma-ta-ne"], ["お元気ですか？", "o-guen-ki des-ka"], ["元気です、ありがとう", "guen-ki des, a-ri-ga-too"],
+      ["お願いします", "o-ne-gai shi-mas"], ["ありがとう", "a-ri-ga-too"], ["どういたしまして", "doo i-ta-shi-mash-te"], ["すみません", "su-mi-ma-sen"], ["ごめんなさい", "go-men-na-sai"], ["はい", "jai"], ["いいえ", "i-ie"],
+      ["私の名前は…です", "ua-ta-shi no na-ma-e ua… des"], ["お名前は？", "o-na-ma-e ua"], ["はじめまして", "ja-yi-me-mash-te"], ["スペイン語を話せますか？", "su-pe-in-go o ja-na-se-mas-ka"], ["わかりません", "ua-ka-ri-ma-sen"],
+      ["トイレはどこですか？", "toi-re ua do-ko des-ka"], ["いくらですか？", "i-ku-ra des-ka"], ["手伝ってもらえますか？", "te-tsu-dat-te mo-ra-e-mas-ka"], ["今何時ですか？", "i-ma nan-yi des-ka"],
+      ["水", "mi-zu"], ["食べ物", "ta-be-mo-no"], ["友達", "to-mo-da-chi"], ["家", "i-e"], ["今日", "kioo"], ["明日", "a-shi-ta"],
+      ["一", "i-chi"], ["二", "ni"], ["三", "san"], ["四", "yon"], ["五", "go"], ["六", "ro-ku"], ["七", "na-na"], ["八", "ja-chi"], ["九", "kiuu"], ["十", "yuu"],
+      ["お会計お願いします", "o-kai-kee o-ne-gai shi-mas"], ["コーヒーをください", "koo-jii o ku-da-sai"], ["お腹が空きました", "o-na-ka ga su-ki-mash-ta"], ["乾杯！", "kan-pai"], ["医者が必要です", "i-sha ga ji-tsu-yoo des"], ["駅はどこですか？", "e-ki ua do-ko des-ka"], ["右へ", "mi-gui e"], ["左へ", "ji-da-ri e"],
+      ["好きです", "su-ki des"], ["愛してる", "ai-shi-te-ru"], ["お誕生日おめでとう！", "o-tan-yoo-bi o-me-de-too"], ["良い旅を！", "yoi ta-bi o"],
     ],
   };
   for (const [code, list] of Object.entries(BOOK)) {
@@ -465,6 +505,8 @@ body.can-speak .speak { display: inline-flex; }
   const ALPHABET = {
     ru: [["А", "a"], ["Б", "b"], ["В", "v"], ["Г", "g de «gato»"], ["Д", "d"], ["Е", "ie"], ["Ё", "io"], ["Ж", "zh"], ["З", "s con zumbido"], ["И", "i"], ["Й", "i breve"], ["К", "k"], ["Л", "l"], ["М", "m"], ["Н", "n"], ["О", "o"], ["П", "p"], ["Р", "r"], ["С", "s"], ["Т", "t"], ["У", "u"], ["Ф", "f"], ["Х", "j"], ["Ц", "ts"], ["Ч", "ch"], ["Ш", "sh"], ["Щ", "sh suave"], ["Ъ", "signo duro"], ["Ы", "i gutural"], ["Ь", "signo blando"], ["Э", "e"], ["Ю", "iu"], ["Я", "ia"]],
     uk: [["А", "a"], ["Б", "b"], ["В", "v"], ["Г", "j suave"], ["Ґ", "g de «gato»"], ["Д", "d"], ["Е", "e"], ["Є", "ie"], ["Ж", "zh"], ["З", "s con zumbido"], ["И", "i grave"], ["І", "i"], ["Ї", "yi"], ["Й", "i breve"], ["К", "k"], ["Л", "l"], ["М", "m"], ["Н", "n"], ["О", "o"], ["П", "p"], ["Р", "r"], ["С", "s"], ["Т", "t"], ["У", "u"], ["Ф", "f"], ["Х", "j"], ["Ц", "ts"], ["Ч", "ch"], ["Ш", "sh"], ["Щ", "shch"], ["Ь", "signo blando"], ["Ю", "iu"], ["Я", "ia"]],
+    // Hiragana y katakana, los 46 signos básicos de cada silabario.
+    ja: [["あ ア", "a"], ["い イ", "i"], ["う ウ", "u"], ["え エ", "e"], ["お オ", "o"], ["か カ", "ka"], ["き キ", "ki"], ["く ク", "ku"], ["け ケ", "ke"], ["こ コ", "ko"], ["さ サ", "sa"], ["し シ", "shi"], ["す ス", "su"], ["せ セ", "se"], ["そ ソ", "so"], ["た タ", "ta"], ["ち チ", "chi"], ["つ ツ", "tsu"], ["て テ", "te"], ["と ト", "to"], ["な ナ", "na"], ["に ニ", "ni"], ["ぬ ヌ", "nu"], ["ね ネ", "ne"], ["の ノ", "no"], ["は ハ", "ja"], ["ひ ヒ", "ji"], ["ふ フ", "fu"], ["へ ヘ", "je"], ["ほ ホ", "jo"], ["ま マ", "ma"], ["み ミ", "mi"], ["む ム", "mu"], ["め メ", "me"], ["も モ", "mo"], ["や ヤ", "ya"], ["ゆ ユ", "yu"], ["よ ヨ", "yo"], ["ら ラ", "ra"], ["り リ", "ri"], ["る ル", "ru"], ["れ レ", "re"], ["ろ ロ", "ro"], ["わ ワ", "ua"], ["を ヲ", "o"], ["ん ン", "n"]],
   };
 
   const SOUNDS = {
@@ -511,6 +553,24 @@ body.can-speak .speak { display: inline-flex; }
       ["zh (ж)", "Una «y» fuerte y zumbada, como la «ll» rioplatense."],
       ["і, ї", "«і» es la «i» española; «ї» suena «yi»."],
       ["o sin acento", "A diferencia del ruso, la «о» siempre suena «o»."],
+    ],
+    pt: [
+      ["d + i → yi", "«di» y la «de» final suenan «yi», con «y» fuerte (bom dia: bon YI-a)."],
+      ["t + i → chi", "«ti» y la «te» final suenan «chi» (boa noite: BO-a NOI-chi)."],
+      ["ão → aun", "Vocal nasal: el aire sale por la nariz (não: naun)."],
+      ["o, e finales", "La «o» final sin acento suena «u» y la «e» final suena «i» (obrigado: o-bri-GA-du)."],
+      ["zh (j, g)", "Una «y» fuerte y zumbada, como la «ll» rioplatense (hoje: O-zhi)."],
+      ["nh, lh", "«nh» es la «ñ» y «lh» es la «ll» (banheiro: ba-ÑEI-ru)."],
+      ["obrigado, -a", "Los hombres dicen «obrigado» y las mujeres «obrigada»."],
+    ],
+    ja: [
+      ["sin sílaba fuerte", "El japonés no tiene acento de intensidad: todas las sílabas duran lo mismo. Por eso la guía no resalta ninguna."],
+      ["j (h)", "La «h» japonesa suena como una «j» muy suave (はい: jai)."],
+      ["y (j)", "La «j» japonesa suena como una «y» fuerte (はじめまして: ja-yi-me-mash-te)."],
+      ["vocal doble", "«oo», «uu» o «ii» es la misma vocal alargada (ありがとう: a-ri-ga-too)."],
+      ["u casi muda", "Al final de «desu» y «masu» la «u» casi no suena: des, mas."],
+      ["r", "Un solo toque suave de la lengua, entre «r» y «l»."],
+      ["kanji", "Además de los dos silabarios, el japonés usa kanji: signos que representan palabras enteras, como 水 (agua)."],
     ],
   };
 
@@ -613,7 +673,7 @@ body.can-speak .speak { display: inline-flex; }
 
   // ---------- Voz (la del navegador, si el dispositivo tiene una para ese idioma) ----------
   const synth = "speechSynthesis" in window ? window.speechSynthesis : null;
-  const VOICE_TAG = { es: "es-ES", en: "en-US", ru: "ru-RU", de: "de-DE", fr: "fr-FR", it: "it-IT", uk: "uk-UA" };
+  const VOICE_TAG = { es: "es-ES", en: "en-US", ru: "ru-RU", de: "de-DE", fr: "fr-FR", it: "it-IT", uk: "uk-UA", pt: "pt-BR", ja: "ja-JP" };
   let speakingBtn = null;
   let currentUtterance = null;
   function setSpeaking(btn) {
@@ -675,7 +735,7 @@ body.can-speak .speak { display: inline-flex; }
   dstSel.value = tr.dst;
 
   const normalize = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
-    .replace(/[¿?¡!.,;:…"'’ʼ«»()]/g, "").replace(/\s+/g, " ").trim();
+    .replace(/[¿?¡!.,;:…"'’ʼ«»()。、？！]/g, "").replace(/\s+/g, " ").trim();
   const indexCache = {};
   function lookup(src, dst, text) {
     if (!indexCache[src]) {
@@ -751,6 +811,8 @@ body.can-speak .speak { display: inline-flex; }
   }
   const decodeEntities = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
 
+  const apiCode = (code) => (code === "pt" ? "pt-BR" : code); // el cuaderno usa portugués de Brasil
+
   async function translate() {
     if (tr.busy) { tr.busy.abort(); showPlaceholder(""); return; }
     const text = input.value.trim();
@@ -762,7 +824,7 @@ body.can-speak .speak { display: inline-flex; }
     showPlaceholder("Traduciendo…");
     const src = tr.src, dst = tr.dst;
     try {
-      const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=" + src + "%7C" + dst;
+      const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=" + apiCode(src) + "%7C" + apiCode(dst);
       const res = await fetch(url, { signal: ctl.signal });
       if (res.status === 429) throw { code: "quota" };
       if (!res.ok) throw { code: "network" };
@@ -782,7 +844,7 @@ body.can-speak .speak { display: inline-flex; }
     } catch (e) {
       const code = e && e.code;
       if (ctl.signal.aborted) { /* el usuario lo detuvo o cambió el texto: ya se actualizó la vista */ }
-      else if (code === "quota") showPlaceholder("Se agotó el cupo gratuito de traducciones por hoy. Las 40 frases del cuaderno siguen funcionando.", true);
+      else if (code === "quota") showPlaceholder("Se agotó el cupo gratuito de traducciones por hoy. Las frases del cuaderno siguen funcionando.", true);
       else if (code === "empty") showPlaceholder("No se encontró una traducción para este texto. Prueba con otra frase.", true);
       else showPlaceholder("No se pudo conectar con el servicio de traducción. Revisa tu conexión y vuelve a intentarlo.", true);
     } finally {
@@ -907,7 +969,7 @@ body.can-speak .speak { display: inline-flex; }
       onclick: () => { learn.lang = code; store.set("learnLang", code); learn.deck = null; renderLearn(); },
     }, LANGS[code].native, h("small", { lang: "es", text: LANGS[code].lower }))));
 
-    const third = ALPHABET[lang] ? "Alfabeto" : "Sonidos";
+    const third = lang === "ja" ? "Kana" : ALPHABET[lang] ? "Alfabeto" : "Sonidos";
     $("mode-buttons").replaceChildren(...[["frases", "Frases"], ["practica", "Práctica"], ["sonidos", third]].map(([id, label]) => h("button", {
       type: "button", "aria-pressed": String(learn.mode === id), text: label,
       onclick: () => { learn.mode = id; learn.deck = null; renderLearn(); },
@@ -922,7 +984,9 @@ body.can-speak .speak { display: inline-flex; }
 
   function renderPhrases(body) {
     const lang = learn.lang;
-    const legend = h("p", { class: "legend" }, "Entre corchetes va la pronunciación escrita como se leería en español. La sílaba resaltada, como ", h("b", { text: "VIET" }), ", es la que suena más fuerte.");
+    const legend = lang === "ja"
+      ? h("p", { class: "legend", text: "Entre corchetes va la pronunciación escrita como se leería en español. En japonés ninguna sílaba suena más fuerte que las demás, así que la guía no resalta ninguna." })
+      : h("p", { class: "legend" }, "Entre corchetes va la pronunciación escrita como se leería en español. La sílaba resaltada, como ", h("b", { text: "VIET" }), ", es la que suena más fuerte.");
     const list = h("ul", { class: "entries" }, catIds().map((i) => {
       const pron = h("span", { class: "pron" });
       renderPron(pron, phrasePron(lang, i));
@@ -994,13 +1058,15 @@ body.can-speak .speak { display: inline-flex; }
     const parts = [];
     if (ALPHABET[lang]) {
       parts.push(
-        h("p", { class: "legend", text: "El alfabeto cirílico del " + LANGS[lang].lower + " tiene " + ALPHABET[lang].length + " letras. Debajo de cada una está el sonido más parecido en español." }),
+        h("p", { class: "legend", text: lang === "ja"
+          ? "El japonés se escribe con dos silabarios, hiragana y katakana, de " + ALPHABET[lang].length + " signos básicos cada uno. En cada casilla van el hiragana y el katakana de la misma sílaba, y debajo cómo suena en español."
+          : "El alfabeto cirílico del " + LANGS[lang].lower + " tiene " + ALPHABET[lang].length + " letras. Debajo de cada una está el sonido más parecido en español." }),
         h("div", { class: "alphabet" }, ALPHABET[lang].map(([letter, sound]) => h("div", { class: "letter" },
-          h("b", { lang, text: letter + " " + letter.toLowerCase() }),
+          h("b", { lang, text: letter.toLowerCase() === letter ? letter : letter + " " + letter.toLowerCase() }),
           h("span", { text: sound })))),
-        h("p", { class: "subhead", text: "Sonidos que no existen en español" }));
+        h("p", { class: "subhead", text: lang === "ja" ? "Claves para leer la guía" : "Sonidos que no existen en español" }));
     } else {
-      parts.push(h("p", { class: "legend", text: "Estas son las claves para leer la pronunciación del " + LANGS[lang].lower + " en este cuaderno." }));
+      parts.push(h("p", { class: "legend", text: "Estas son las claves para leer la pronunciación del " + LANGS[lang].lower + " en este cuaderno." + (lang === "pt" ? " Se usa la pronunciación de Brasil." : "") }));
     }
     parts.push(h("ul", { class: "sounds" }, SOUNDS[lang].map(([sign, text]) => h("li", null, h("b", { text: sign }), h("span", { text })))));
     body.replaceChildren(...parts);
