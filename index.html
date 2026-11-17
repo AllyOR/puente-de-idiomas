@@ -169,6 +169,16 @@ body.can-speak .speak { display: inline-flex; }
 .pane-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; }
 .pane-foot .actions { display: flex; gap: 8px; margin-left: auto; }
 .count { color: var(--muted); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
+.foot-left { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-width: 0; }
+.clear-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--muted);
+  font-size: 0.875rem; font-weight: 600;
+}
+.clear-btn svg { width: 14px; height: 14px; }
+.clear-btn:hover { color: var(--ink); border-color: var(--muted); }
 
 .headword {
   font: 600 1.6rem/1.25 var(--font-word);
@@ -326,9 +336,15 @@ body.can-speak .speak { display: inline-flex; }
 
       <div class="panes">
         <div class="pane">
-          <textarea id="source-text" maxlength="300" rows="3" aria-label="Texto para traducir" placeholder="Escribe una palabra o una frase corta">Buenos días</textarea>
+          <textarea id="source-text" maxlength="300" rows="3" aria-label="Texto para traducir" placeholder="Escribe una palabra o una frase corta"></textarea>
           <div class="pane-foot">
-            <span id="char-count" class="count">11 / 300</span>
+            <div class="foot-left">
+              <span id="char-count" class="count">0 / 300</span>
+              <button type="button" id="clear-btn" class="clear-btn" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                Borrar todo
+              </button>
+            </div>
             <button type="button" id="translate-btn" class="btn primary">Traducir</button>
           </div>
         </div>
@@ -901,8 +917,18 @@ body.can-speak .speak { display: inline-flex; }
     if (moved) { input.value = moved; updateCount(); }
     tryInstant();
   });
-  function updateCount() { $("char-count").textContent = input.value.length + " / 300"; }
+  function updateCount() {
+    $("char-count").textContent = input.value.length + " / 300";
+    $("clear-btn").hidden = input.value.length === 0;
+  }
   input.addEventListener("input", () => { updateCount(); cancelBusy(); tryInstant(); });
+  $("clear-btn").addEventListener("click", () => {
+    cancelBusy();
+    input.value = "";
+    updateCount();
+    tryInstant(); // sin texto, vuelve a mostrar «La traducción aparecerá aquí.»
+    input.focus();
+  });
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); translate(); }
   });
