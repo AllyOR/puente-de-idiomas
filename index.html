@@ -419,9 +419,12 @@ body.can-speak .speak { display: inline-flex; }
     "Uno", "Dos", "Tres", "Cuatro", "Cinco", "Seis", "Siete", "Ocho", "Nueve", "Diez",
     "La cuenta, por favor", "Quisiera un café", "Tengo hambre", "¡Salud!", "Necesito un médico", "¿Dónde está la estación?", "A la derecha", "A la izquierda",
     "Me gusta", "Te quiero", "¡Feliz cumpleaños!", "¡Buen viaje!",
+    "¿Habla inglés?", "Más despacio, por favor", "Repita, por favor", "Un momento, por favor", "Entiendo", "No sé",
+    "Tengo sed", "Buen provecho", "Está delicioso", "¿Aceptan tarjeta?",
+    "¿Tiene wifi?", "Soy de Bolivia", "Sin problema", "Hasta mañana", "¡Buena suerte!", "¡Ayuda!",
   ];
   const CATS = [
-    { id: "todas", name: "Todas", from: 0, to: 52 },
+    { id: "todas", name: "Todas", from: 0, to: 68 },
     { id: "saludos", name: "Saludos", from: 0, to: 8 },
     { id: "cortesia", name: "Cortesía", from: 8, to: 15 },
     { id: "conversar", name: "Conversar", from: 15, to: 20 },
@@ -430,6 +433,9 @@ body.can-speak .speak { display: inline-flex; }
     { id: "numeros", name: "Números", from: 30, to: 40 },
     { id: "viaje", name: "De viaje", from: 40, to: 48 },
     { id: "expresiones", name: "Expresiones", from: 48, to: 52 },
+    { id: "entenderse", name: "Entenderse", from: 52, to: 58 },
+    { id: "mesa", name: "En la mesa", from: 58, to: 62 },
+    { id: "mas", name: "Más frases", from: 62, to: 68 },
   ];
 
   // [texto en el idioma, pronunciación escrita para hispanohablantes; MAYÚSCULAS = sílaba fuerte]
@@ -443,6 +449,9 @@ body.can-speak .speak { display: inline-flex; }
       ["One", "uan"], ["Two", "tu"], ["Three", "zri"], ["Four", "for"], ["Five", "faiv"], ["Six", "siks"], ["Seven", "SE-ven"], ["Eight", "eit"], ["Nine", "nain"], ["Ten", "ten"],
       ["The check, please", "de CHEK, plis"], ["I'd like a coffee", "aid laik a CO-fi"], ["I'm hungry", "aim JAN-gri"], ["Cheers!", "chirs"], ["I need a doctor", "ai nid a DOC-tor"], ["Where is the station?", "uer is de STEI-shon"], ["To the right", "tu de RAIT"], ["To the left", "tu de LEFT"],
       ["I like it", "ai LAIK it"], ["I love you", "ai LAV iu"], ["Happy birthday!", "JA-pi BERZ-dei"], ["Have a good trip!", "jav a gud TRIP"],
+      ["Do you speak English?", "du iu spik IN-glish"], ["Slower, please", "SLOU-er, plis"], ["Please repeat that", "plis ri-PIT dat"], ["One moment, please", "uan MOU-ment, plis"], ["I understand", "ai an-der-STAND"], ["I don't know", "ai dount NOU"],
+      ["I'm thirsty", "aim ZERS-ti"], ["Enjoy your meal", "en-YOI iur MIL"], ["It's delicious", "its di-LI-shes"], ["Do you take cards?", "du iu teik CARDS"],
+      ["Do you have Wi-Fi?", "du iu jav UAI-fai"], ["I'm from Bolivia", "aim fram bo-LI-via"], ["No problem", "nou PRA-blem"], ["See you tomorrow", "si iu tu-MO-rou"], ["Good luck!", "gud LAK"], ["Help!", "jelp"],
     ],
     ru: [
       ["Привет", "pri-VIET"], ["Доброе утро", "DO-bra-ie U-tra"], ["Добрый день", "DO-bri dien"], ["Добрый вечер", "DO-bri VIE-chir"], ["До свидания", "da svi-DA-ni-ia"], ["Пока", "pa-KA"], ["Как дела?", "kak di-LA"], ["Хорошо, спасибо", "ja-ra-SHO, spa-SI-ba"],
@@ -453,6 +462,9 @@ body.can-speak .speak { display: inline-flex; }
       ["Один", "a-DIN"], ["Два", "dva"], ["Три", "tri"], ["Четыре", "chi-TI-rie"], ["Пять", "piat"], ["Шесть", "shest"], ["Семь", "siem"], ["Восемь", "VO-sim"], ["Девять", "DIE-vit"], ["Десять", "DIE-sit"],
       ["Счёт, пожалуйста", "shiot, pa-ZHA-lus-ta"], ["Можно кофе, пожалуйста?", "MOZH-na KO-fie, pa-ZHA-lus-ta"], ["Я хочу есть", "ia ja-CHU iest"], ["За здоровье!", "za zda-RO-vie"], ["Мне нужен врач", "mnie NU-zhen vrach"], ["Где вокзал?", "gdie vak-ZAL"], ["Направо", "na-PRA-va"], ["Налево", "na-LIE-va"],
       ["Мне нравится", "mnie NRA-vi-tsa"], ["Я тебя люблю", "ia ti-BIA liu-BLIU"], ["С днём рождения!", "s dniom razh-DIE-ni-ia"], ["Счастливого пути!", "shis-LI-va-va pu-TI"],
+      ["Вы говорите по-английски?", "vi ga-va-RI-tie pa an-GLIS-ki"], ["Говорите медленнее, пожалуйста", "ga-va-RI-tie MIED-li-nie-ie, pa-ZHA-lus-ta"], ["Повторите, пожалуйста", "paf-ta-RI-tie, pa-ZHA-lus-ta"], ["Одну минуту, пожалуйста", "ad-NU mi-NU-tu, pa-ZHA-lus-ta"], ["Я понимаю", "ia pa-ni-MA-iu"], ["Я не знаю", "ia ni ZNA-iu"],
+      ["Я хочу пить", "ia ja-CHU pit"], ["Приятного аппетита", "pri-IAT-na-va a-pi-TI-ta"], ["Очень вкусно", "O-chin FKUS-na"], ["Вы принимаете карты?", "vi pri-ni-MA-ie-tie KAR-ti"],
+      ["У вас есть Wi-Fi?", "u vas iest UAI-fai"], ["Я из Боливии", "ia iz ba-LI-vi-i"], ["Без проблем", "bies prab-LIEM"], ["До завтра", "da ZAF-tra"], ["Удачи!", "u-DA-chi"], ["Помогите!", "pa-ma-GUI-tie"],
     ],
     de: [
       ["Hallo", "JA-lo"], ["Guten Morgen", "GU-ten MOR-guen"], ["Guten Tag", "GU-ten tak"], ["Guten Abend", "GU-ten A-bent"], ["Auf Wiedersehen", "auf VI-der-se-en"], ["Bis später", "bis SHPE-ter"], ["Wie geht's?", "vi GUETS"], ["Gut, danke", "gut, DAN-ke"],
@@ -463,6 +475,9 @@ body.can-speak .speak { display: inline-flex; }
       ["Eins", "ains"], ["Zwei", "tsvai"], ["Drei", "drai"], ["Vier", "fir"], ["Fünf", "fünf"], ["Sechs", "seks"], ["Sieben", "SI-ben"], ["Acht", "ajt"], ["Neun", "noin"], ["Zehn", "tsen"],
       ["Die Rechnung, bitte", "di REJ-nung, BI-te"], ["Ich hätte gern einen Kaffee", "ij JE-te guern AI-nen KA-fe"], ["Ich habe Hunger", "ij JA-be JUN-guer"], ["Prost!", "prost"], ["Ich brauche einen Arzt", "ij BRAU-je AI-nen artst"], ["Wo ist der Bahnhof?", "vo ist der BAN-jof"], ["Nach rechts", "naj rejts"], ["Nach links", "naj links"],
       ["Das gefällt mir", "das gue-FELT mir"], ["Ich liebe dich", "ij LI-be dij"], ["Alles Gute zum Geburtstag!", "A-les GU-te tsum gue-BURTS-tak"], ["Gute Reise!", "GU-te RAI-se"],
+      ["Sprechen Sie Englisch?", "SHPRE-jen si EN-glish"], ["Langsamer, bitte", "LANG-za-mer, BI-te"], ["Bitte wiederholen", "BI-te vi-der-JO-len"], ["Einen Moment, bitte", "AI-nen mo-MENT, BI-te"], ["Ich verstehe", "ij fer-SHTE-e"], ["Ich weiß nicht", "ij vais nijt"],
+      ["Ich habe Durst", "ij JA-be durst"], ["Guten Appetit", "GU-ten a-pe-TIT"], ["Es ist lecker", "es ist LE-ker"], ["Kann ich mit Karte zahlen?", "kan ij mit KAR-te TSA-len"],
+      ["Haben Sie WLAN?", "JA-ben si VE-lan"], ["Ich komme aus Bolivien", "ij KO-me aus bo-LI-vi-en"], ["Kein Problem", "kain pro-BLEM"], ["Bis morgen", "bis MOR-guen"], ["Viel Glück!", "fil GLÜK"], ["Hilfe!", "JIL-fe"],
     ],
     fr: [
       ["Salut", "sa-LÜ"], ["Bonjour", "bon-ZHUR"], ["Bon après-midi", "bon a-pre mi-DI"], ["Bonsoir", "bon-SUAR"], ["Au revoir", "o re-VUAR"], ["À plus tard", "a plü TAR"], ["Comment ça va ?", "co-MAN sa VA"], ["Bien, merci", "bian, mer-SI"],
@@ -473,6 +488,9 @@ body.can-speak .speak { display: inline-flex; }
       ["Un", "an"], ["Deux", "de"], ["Trois", "trua"], ["Quatre", "katr"], ["Cinq", "sank"], ["Six", "sis"], ["Sept", "set"], ["Huit", "üit"], ["Neuf", "nef"], ["Dix", "dis"],
       ["L'addition, s'il vous plaît", "la-di-SION, sil vu PLE"], ["Je voudrais un café", "zhe vu-DRE an ca-FE"], ["J'ai faim", "zhe FAN"], ["Santé !", "san-TE"], ["J'ai besoin d'un médecin", "zhe be-SUAN dan med-SAN"], ["Où est la gare ?", "u e la GAR"], ["À droite", "a DRUAT"], ["À gauche", "a GOSH"],
       ["J'aime ça", "zhem SA"], ["Je t'aime", "zhe TEM"], ["Joyeux anniversaire !", "zhua-IE sa-ni-ver-SER"], ["Bon voyage !", "bon vua-IAZH"],
+      ["Parlez-vous anglais ?", "par-le VU an-GLE"], ["Plus lentement, s'il vous plaît", "plü lant-MAN, sil vu PLE"], ["Répétez, s'il vous plaît", "re-pe-TE, sil vu PLE"], ["Un instant, s'il vous plaît", "an ans-TAN, sil vu PLE"], ["Je comprends", "zhe com-PRAN"], ["Je ne sais pas", "zhe ne SE pa"],
+      ["J'ai soif", "zhe SUAF"], ["Bon appétit", "bo na-pe-TI"], ["C'est délicieux", "se de-li-SIE"], ["Vous acceptez les cartes ?", "vu zak-sep-TE le KART"],
+      ["Avez-vous le Wi-Fi ?", "a-ve VU le ui-FI"], ["Je viens de Bolivie", "zhe VIAN de bo-li-VI"], ["Pas de problème", "pa de pro-BLEM"], ["À demain", "a de-MAN"], ["Bonne chance !", "bon SHANS"], ["Au secours !", "o se-CUR"],
     ],
     it: [
       ["Ciao", "CHA-o"], ["Buongiorno", "buon-YOR-no"], ["Buon pomeriggio", "buon po-me-RI-yo"], ["Buonasera", "buo-na-SE-ra"], ["Arrivederci", "a-rri-ve-DER-chi"], ["A dopo", "a DO-po"], ["Come stai?", "CO-me stai"], ["Bene, grazie", "BE-ne, GRA-tsie"],
@@ -483,6 +501,9 @@ body.can-speak .speak { display: inline-flex; }
       ["Uno", "U-no"], ["Due", "DU-e"], ["Tre", "tre"], ["Quattro", "CUA-tro"], ["Cinque", "CHIN-cue"], ["Sei", "sei"], ["Sette", "SE-te"], ["Otto", "O-to"], ["Nove", "NO-ve"], ["Dieci", "DIE-chi"],
       ["Il conto, per favore", "il CON-to, per fa-VO-re"], ["Vorrei un caffè", "vo-RREI un ca-FE"], ["Ho fame", "o FA-me"], ["Salute!", "sa-LU-te"], ["Ho bisogno di un medico", "o bi-SO-ño di un ME-di-co"], ["Dov'è la stazione?", "do-VE la sta-TSIO-ne"], ["A destra", "a DES-tra"], ["A sinistra", "a si-NIS-tra"],
       ["Mi piace", "mi PIA-che"], ["Ti amo", "ti A-mo"], ["Buon compleanno!", "buon com-ple-A-no"], ["Buon viaggio!", "buon VIA-yo"],
+      ["Parla inglese?", "PAR-la in-GLE-se"], ["Più piano, per favore", "piu PIA-no, per fa-VO-re"], ["Ripeta, per favore", "ri-PE-ta, per fa-VO-re"], ["Un momento, per favore", "un mo-MEN-to, per fa-VO-re"], ["Capisco", "ca-PIS-co"], ["Non lo so", "non lo SO"],
+      ["Ho sete", "o SE-te"], ["Buon appetito", "buon a-pe-TI-to"], ["È delizioso", "e de-li-TSIO-so"], ["Accettate carte?", "a-che-TA-te CAR-te"],
+      ["Avete il Wi-Fi?", "a-VE-te il UAI-fai"], ["Vengo dalla Bolivia", "VEN-go DA-la bo-LI-via"], ["Nessun problema", "nes-SUN pro-BLE-ma"], ["A domani", "a do-MA-ni"], ["Buona fortuna!", "BUO-na for-TU-na"], ["Aiuto!", "a-IU-to"],
     ],
     uk: [
       ["Привіт", "pri-VIT"], ["Доброго ранку", "DO-bro-jo RAN-ku"], ["Добрий день", "DO-bri den"], ["Добрий вечір", "DO-bri VE-chir"], ["До побачення", "do po-BA-chen-nia"], ["До зустрічі", "do ZUS-tri-chi"], ["Як справи?", "iak SPRA-vi"], ["Добре, дякую", "DO-bre, DIA-ku-iu"],
@@ -493,6 +514,9 @@ body.can-speak .speak { display: inline-flex; }
       ["Один", "o-DIN"], ["Два", "dva"], ["Три", "tri"], ["Чотири", "cho-TI-ri"], ["П'ять", "piat"], ["Шість", "shist"], ["Сім", "sim"], ["Вісім", "VI-sim"], ["Дев'ять", "DE-viat"], ["Десять", "DE-siat"],
       ["Рахунок, будь ласка", "ra-JU-nok, bud LAS-ka"], ["Можна каву, будь ласка?", "MOZH-na KA-vu, bud LAS-ka"], ["Я хочу їсти", "ia JO-chu YIS-ti"], ["Будьмо!", "BUD-mo"], ["Мені потрібен лікар", "me-NI po-TRI-ben LI-kar"], ["Де вокзал?", "de vok-ZAL"], ["Праворуч", "pra-VO-ruch"], ["Ліворуч", "li-VO-ruch"],
       ["Мені подобається", "me-NI po-DO-ba-iet-sia"], ["Я тебе кохаю", "ia te-BE ko-JA-iu"], ["З днем народження!", "z dnem na-RO-dzhen-nia"], ["Щасливої дороги!", "shchas-LI-vo-yi do-RO-ji"],
+      ["Ви розмовляєте англійською?", "vi roz-mov-LIA-ie-te an-JLIY-sko-iu"], ["Повільніше, будь ласка", "po-VIL-ni-she, bud LAS-ka"], ["Повторіть, будь ласка", "pov-to-RIT, bud LAS-ka"], ["Хвилинку, будь ласка", "jvi-LIN-ku, bud LAS-ka"], ["Я розумію", "ia ro-zu-MI-iu"], ["Я не знаю", "ia ne ZNA-iu"],
+      ["Я хочу пити", "ia JO-chu PI-ti"], ["Смачного", "SMACH-no-jo"], ["Дуже смачно", "DU-zhe SMACH-no"], ["Ви приймаєте картки?", "vi priy-MA-ie-te KART-ki"],
+      ["У вас є Wi-Fi?", "u vas ie UAI-fai"], ["Я з Болівії", "ia z bo-LI-vi-yi"], ["Без проблем", "bez prob-LEM"], ["До завтра", "do ZAV-tra"], ["Удачі!", "u-DA-chi"], ["Допоможіть!", "do-po-mo-ZHIT"],
     ],
     // Portugués de Brasil. «Obrigado» lo dicen los hombres; las mujeres dicen «obrigada».
     pt: [
@@ -504,6 +528,9 @@ body.can-speak .speak { display: inline-flex; }
       ["Um", "un"], ["Dois", "dois"], ["Três", "tres"], ["Quatro", "CUA-tru"], ["Cinco", "SIN-cu"], ["Seis", "seis"], ["Sete", "SE-chi"], ["Oito", "OI-tu"], ["Nove", "NO-vi"], ["Dez", "des"],
       ["A conta, por favor", "a CON-ta, por fa-VOR"], ["Eu queria um café", "eu ke-RI-a un ca-FE"], ["Estou com fome", "es-TOU con FO-mi"], ["Saúde!", "sa-U-yi"], ["Preciso de um médico", "pre-SI-su yi un ME-yi-cu"], ["Onde fica a estação?", "ON-yi FI-ca a es-ta-SAUN"], ["À direita", "a yi-REI-ta"], ["À esquerda", "a es-KER-da"],
       ["Eu gosto", "eu GOS-tu"], ["Eu te amo", "eu chi A-mu"], ["Feliz aniversário!", "fe-LIS a-ni-ver-SA-riu"], ["Boa viagem!", "BO-a vi-A-zhen"],
+      ["Você fala inglês?", "vo-SE FA-la in-GLES"], ["Mais devagar, por favor", "mais de-va-GAR, por fa-VOR"], ["Repita, por favor", "re-PI-ta, por fa-VOR"], ["Um momento, por favor", "un mo-MEN-tu, por fa-VOR"], ["Eu entendo", "eu en-TEN-du"], ["Não sei", "naun SEI"],
+      ["Estou com sede", "es-TOU con SE-yi"], ["Bom apetite", "bon a-pe-CHI-chi"], ["Está delicioso", "es-TA de-li-SIO-zu"], ["Vocês aceitam cartão?", "vo-SES a-SEI-tan car-TAUN"],
+      ["Tem wi-fi?", "ten UAI-fai"], ["Eu sou da Bolívia", "eu sou da bo-LI-via"], ["Sem problema", "sen pro-BLE-ma"], ["Até amanhã", "a-TE a-ma-ÑAN"], ["Boa sorte!", "BO-a SOR-chi"], ["Socorro!", "so-CO-rru"],
     ],
     // Japonés: sin sílaba fuerte, por eso la guía va toda en minúsculas. Vocal doble = vocal larga.
     ja: [
@@ -515,6 +542,9 @@ body.can-speak .speak { display: inline-flex; }
       ["一", "i-chi"], ["二", "ni"], ["三", "san"], ["四", "yon"], ["五", "go"], ["六", "ro-ku"], ["七", "na-na"], ["八", "ja-chi"], ["九", "kiuu"], ["十", "yuu"],
       ["お会計お願いします", "o-kai-kee o-ne-gai shi-mas"], ["コーヒーをください", "koo-jii o ku-da-sai"], ["お腹が空きました", "o-na-ka ga su-ki-mash-ta"], ["乾杯！", "kan-pai"], ["医者が必要です", "i-sha ga ji-tsu-yoo des"], ["駅はどこですか？", "e-ki ua do-ko des-ka"], ["右へ", "mi-gui e"], ["左へ", "ji-da-ri e"],
       ["好きです", "su-ki des"], ["愛してる", "ai-shi-te-ru"], ["お誕生日おめでとう！", "o-tan-yoo-bi o-me-de-too"], ["良い旅を！", "yoi ta-bi o"],
+      ["英語を話せますか？", "ei-go o ja-na-se-mas-ka"], ["ゆっくりお願いします", "yuk-ku-ri o-ne-gai shi-mas"], ["もう一度お願いします", "moo i-chi-do o-ne-gai shi-mas"], ["少々お待ちください", "shoo-shoo o-ma-chi ku-da-sai"], ["わかりました", "ua-ka-ri-mash-ta"], ["知りません", "shi-ri-ma-sen"],
+      ["喉が渇きました", "no-do ga ka-ua-ki-mash-ta"], ["召し上がれ", "me-shi-a-ga-re"], ["おいしいです", "o-i-shii des"], ["カードは使えますか？", "kaa-do ua tsu-ka-e-mas-ka"],
+      ["Wi-Fiはありますか？", "uai-fai ua a-ri-mas-ka"], ["ボリビアから来ました", "bo-ri-bi-a ka-ra ki-mash-ta"], ["問題ありません", "mon-dai a-ri-ma-sen"], ["また明日", "ma-ta a-shi-ta"], ["頑張って！", "gam-bat-te"], ["助けて！", "ta-su-ke-te"],
     ],
   };
   for (const [code, list] of Object.entries(BOOK)) {

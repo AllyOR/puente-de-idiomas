@@ -8,9 +8,9 @@ Una app web sencilla para traducir y aprender frases básicas desde el español.
 
 - **Traducir** entre español, inglés, ruso, alemán, francés, italiano, ucraniano,
   portugués (de Brasil) y japonés.
-- **Aprender** desde el español hacia el idioma que elijas, con 52 frases y palabras
-  sencillas en ocho temas: saludos, cortesía, conversar, preguntas, palabras, números,
-  de viaje y expresiones.
+- **Aprender** desde el español hacia el idioma que elijas, con 68 frases y palabras
+  sencillas en once temas: saludos, cortesía, conversar, preguntas, palabras, números,
+  de viaje, expresiones, entenderse, en la mesa y más frases.
   - *Frases:* cada una con su escritura original (cirílico en ruso y ucraniano, kana y
     kanji en japonés) y la pronunciación escrita como se leería en español, con la
     sílaba fuerte resaltada.
@@ -23,7 +23,7 @@ Una app web sencilla para traducir y aprender frases básicas desde el español.
 
 ## Cómo traduce
 
-- Las 52 frases del cuaderno se traducen al instante y sin conexión.
+- Las 68 frases del cuaderno se traducen al instante y sin conexión.
 - Cualquier otro texto se envía al servicio gratuito [MyMemory](https://mymemory.translated.net/)
   (sin clave, con un cupo diario). No escribas datos personales.
 - En las traducciones automáticas al ruso y al ucraniano, la pronunciación es una
